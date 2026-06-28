@@ -77,7 +77,7 @@ const COUNTRY_BANNERS = {
     flag: '🇮🇪',
     tagline: 'Vibrant Innovation, Rich Culture & EU Access',
     desc: 'Explore top Irish universities and technological institutes known for research excellence, close ties to global tech and pharma hubs, and supportive post-study work paths.',
-    bg: 'linear-gradient(135deg, #052e16 0%, #0f172a 50%, #7c2d12 100%)',
+    bg: 'linear-gradient(135deg, #0d5a2d 0%, #f1f5f9 50%, #b45309 100%)',
   },
 }
 
@@ -148,9 +148,9 @@ export default function CountryPage() {
           <div className="country-hero-content">
             <span className="country-hero-flag">{banner.flag}</span>
             <div>
-              <h1 className="h1" style={{ color: 'white', marginBottom: 8 }}>Study in {banner.label}</h1>
-              <p style={{ color: 'rgba(255,255,255,.8)', fontSize: '1.05rem', marginBottom: 24 }}>{banner.tagline}</p>
-              <p style={{ color: 'rgba(255,255,255,.65)', maxWidth: 640, fontSize: '.9rem', lineHeight: 1.7 }}>{banner.desc}</p>
+              <h1 className="h1" style={{ color: 'white', marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>Study in {banner.label}</h1>
+              <p style={{ color: 'rgba(255,255,255,.9)', fontSize: '1.05rem', marginBottom: 24, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.tagline}</p>
+              <p style={{ color: 'rgba(255,255,255,.75)', maxWidth: 640, fontSize: '.9rem', lineHeight: 1.7, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.desc}</p>
             </div>
           </div>
         </div>
@@ -216,6 +216,10 @@ export default function CountryPage() {
           padding: calc(var(--nav-h) + 40px) 0 52px;
           margin-top: calc(-1 * (var(--nav-h) + 32px));
           margin-bottom: 0;
+        }
+        .country-hero nav, .country-hero nav a, .country-hero nav span {
+          color: rgba(255, 255, 255, 0.85) !important;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .country-hero-content { display: flex; align-items: flex-start; gap: 24px; }
         .country-hero-flag { font-size: 4rem; flex-shrink: 0; }
