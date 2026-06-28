@@ -98,6 +98,7 @@ export default function SearchPage() {
             { label: 'All France', payload: { country: 'France', province: '', city: '' } },
             { label: 'All Netherlands', payload: { country: 'Netherlands', province: '', city: '' } },
             { label: 'All New Zealand', payload: { country: 'New Zealand', province: '', city: '' } },
+            { label: 'All Ireland', payload: { country: 'Ireland', province: '', city: '' } },
             { label: 'UG Programs', payload: { level: 'UG' } },
             { label: 'PG Programs', payload: { level: 'PG' } },
             { label: 'Scholarships', payload: { scholarship: true } },

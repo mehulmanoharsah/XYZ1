@@ -72,6 +72,13 @@ const COUNTRY_BANNERS = {
     desc: 'Explore top New Zealand universities and institutes of technology offering high-quality education, hands-on learning, and excellent post-study work opportunities.',
     bg: 'linear-gradient(135deg, #0b2265 0%, #1a365d 50%, #d11919 100%)',
   },
+  ireland: {
+    label: 'Ireland',
+    flag: '🇮🇪',
+    tagline: 'Vibrant Innovation, Rich Culture & EU Access',
+    desc: 'Explore top Irish universities and technological institutes known for research excellence, close ties to global tech and pharma hubs, and supportive post-study work paths.',
+    bg: 'linear-gradient(135deg, #16a34a 0%, #ffffff 50%, #ea580c 100%)',
+  },
 }
 
 export default function CountryPage() {

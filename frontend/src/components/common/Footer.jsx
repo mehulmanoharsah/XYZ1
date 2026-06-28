@@ -29,6 +29,7 @@ export default function Footer() {
             <Link to="/country/france" className="footer-link">France Universities</Link>
             <Link to="/country/netherlands" className="footer-link">Netherlands Universities</Link>
             <Link to="/country/new-zealand" className="footer-link">New Zealand Universities</Link>
+            <Link to="/country/ireland" className="footer-link">Ireland Universities</Link>
             <Link to="/search?level=UG" className="footer-link">Undergraduate Programs</Link>
             <Link to="/search?level=PG" className="footer-link">Postgraduate Programs</Link>
             <Link to="/search?scholarship=true" className="footer-link">Scholarships</Link>
