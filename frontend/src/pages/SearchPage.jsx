@@ -59,6 +59,7 @@ export default function SearchPage() {
       setPages(r.data.total_pages || 1)
       setProvinces(r.data.filters?.provinces || [])
       setCities(r.data.filters?.cities || [])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }).finally(() => setLoading(false))
   }, [filtersKey])
 
@@ -96,6 +97,7 @@ export default function SearchPage() {
             { label: 'All Germany', payload: { country: 'Germany', province: '', city: '' } },
             { label: 'All France', payload: { country: 'France', province: '', city: '' } },
             { label: 'All Netherlands', payload: { country: 'Netherlands', province: '', city: '' } },
+            { label: 'All New Zealand', payload: { country: 'New Zealand', province: '', city: '' } },
             { label: 'UG Programs', payload: { level: 'UG' } },
             { label: 'PG Programs', payload: { level: 'PG' } },
             { label: 'Scholarships', payload: { scholarship: true } },

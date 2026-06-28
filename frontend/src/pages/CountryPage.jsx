@@ -58,6 +58,20 @@ const COUNTRY_BANNERS = {
     desc: 'Explore top universities and colleges across the United Kingdom, from historic campus settings to cutting-edge metropolitan research hubs with strong industry ties.',
     bg: 'linear-gradient(135deg, #0b2265 0%, #00247d 40%, #cf142b 100%)',
   },
+  'new-zealand': {
+    label: 'New Zealand',
+    flag: '🇳🇿',
+    tagline: 'World-Class Education & Stunning Natural Beauty',
+    desc: 'Explore top New Zealand universities and institutes of technology offering high-quality education, hands-on learning, and excellent post-study work opportunities.',
+    bg: 'linear-gradient(135deg, #0b2265 0%, #1a365d 50%, #d11919 100%)',
+  },
+  'new zealand': {
+    label: 'New Zealand',
+    flag: '🇳🇿',
+    tagline: 'World-Class Education & Stunning Natural Beauty',
+    desc: 'Explore top New Zealand universities and institutes of technology offering high-quality education, hands-on learning, and excellent post-study work opportunities.',
+    bg: 'linear-gradient(135deg, #0b2265 0%, #1a365d 50%, #d11919 100%)',
+  },
 }
 
 export default function CountryPage() {
@@ -111,6 +125,7 @@ export default function CountryPage() {
       setTotalPages(r.data.total_pages || 1)
       setProvinces(r.data.filters?.provinces || [])
       setCities(r.data.filters?.cities || [])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }).finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [countryName, debouncedQ, filters.province, filters.city, filters.type, filters.scholarship, filters.page])

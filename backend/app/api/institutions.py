@@ -17,6 +17,15 @@ router = APIRouter(prefix="/api/institutions", tags=["Institutions"])
 
 
 # ── Shared filter builder ─────────────────────────────────────
+def _build_country_filter(country: str | None) -> dict | None:
+    if not country:
+        return None
+
+    normalized = re.sub(r"[\s-]+", " ", country.strip()).lower()
+    pattern = re.escape(normalized).replace(r"\ ", r"[\s-]")
+    return {"country": {"$regex": pattern, "$options": "i"}}
+
+
 def _build_filter(
     country: str | None,
     province: str | None,
@@ -27,8 +36,9 @@ def _build_filter(
 ) -> dict:
     f: dict = {}
 
-    if country:
-        f["country"] = {"$regex": re.escape(country), "$options": "i"}
+    country_filter = _build_country_filter(country)
+    if country_filter:
+        f.update(country_filter)
     if province:
         f["province"] = {"$regex": re.escape(province), "$options": "i"}
     if city:
@@ -116,7 +126,7 @@ async def list_by_country(
 
     # Aggregate province & city lists for the sidebar (unfiltered by current
     # province/city so the dropdowns stay fully populated)
-    country_filter = {"country": {"$regex": re.escape(country_name), "$options": "i"}}
+    country_filter = _build_country_filter(country_name)
     pipeline = [
         {"$match": country_filter},
         {

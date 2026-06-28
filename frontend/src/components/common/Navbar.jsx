@@ -45,6 +45,7 @@ export default function Navbar() {
           <NavLink to="/country/germany" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>Germany</NavLink>
           <NavLink to="/country/france" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>France</NavLink>
           <NavLink to="/country/netherlands" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>Netherlands</NavLink>
+          <NavLink to="/country/new-zealand" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>New Zealand</NavLink>
           <NavLink to="/search" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             <Search size={15} /> Search
           </NavLink>
@@ -99,6 +100,7 @@ export default function Navbar() {
           <NavLink to="/country/germany" className="mobile-link">Germany</NavLink>
           <NavLink to="/country/france" className="mobile-link">France</NavLink>
           <NavLink to="/country/netherlands" className="mobile-link">Netherlands</NavLink>
+          <NavLink to="/country/new-zealand" className="mobile-link">New Zealand</NavLink>
           <NavLink to="/search" className="mobile-link">Search</NavLink>
           {user && <NavLink to="/favorites" className="mobile-link">Saved</NavLink>}
           {user && <NavLink to="/dashboard" className="mobile-link">Dashboard</NavLink>}

@@ -15,12 +15,13 @@ const COUNTRIES = [
   { name: 'Germany', flag: '🇩🇪', color: '#374151', desc: 'Engineering excellence', path: '/country/germany', stats: '20 Institutions', disabled: false },
   { name: 'France', flag: '🇫🇷', color: '#051440', desc: 'Academic prestige & culture', path: '/country/france', stats: '20 Institutions', disabled: false },
   { name: 'Netherlands', flag: '🇳🇱', color: '#1e3a8a', desc: 'Innovation & research hubs', path: '/country/netherlands', stats: '20 Institutions', disabled: false },
+  { name: 'New Zealand', flag: '🇳🇿', color: '#0b2265', desc: 'Stunning landscapes & top education', path: '/country/new-zealand', stats: '19 Institutions', disabled: false },
   { name: 'Ireland', flag: '🇮🇪', color: '#059669', desc: 'EU access & tech hubs', path: '/search?country=Ireland', stats: 'Coming Soon', disabled: true },
 ]
 
 const STATS = [
   { icon: GraduationCap, label: 'Universities & Colleges', value: '20+' },
-  { icon: Globe,         label: 'Countries Covered',       value: '6+' },
+  { icon: Globe,         label: 'Countries Covered',       value: '8+' },
   { icon: Star,          label: 'Scholarships Listed',      value: '50+' },
   { icon: Users,         label: 'Students Helped',          value: '1k+' },
 ]
