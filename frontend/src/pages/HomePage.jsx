@@ -25,7 +25,7 @@ const COUNTRIES = [
 const STATS = [
   { icon: GraduationCap, label: 'Universities & Colleges', value: '250+' },
   { icon: Globe,         label: 'Countries Covered',       value: '12+' },
-  { icon: Star,          label: 'Scholarships Listed',      value: '2000+' },
+  { icon: Star,          label: 'Scholarships Listed',      value: '30+' },
 ]
 
 export default function HomePage() {
@@ -198,7 +198,7 @@ export default function HomePage() {
         .hero-tag:hover { background: rgba(255,255,255,.2); color: white; }
         /* Stats */
         .stats-bar { background: white; border-bottom: 1px solid var(--gray-100); padding: 28px 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+        .stats-grid { display: flex; justify-content: center; gap: 64px; flex-wrap: wrap; }
         .stat-item { display: flex; align-items: center; gap: 14px; }
         .stat-icon {
           width: 44px; height: 44px; border-radius: var(--radius-md);
@@ -237,8 +237,8 @@ export default function HomePage() {
         /* CTA */
         .cta-section { background: linear-gradient(135deg, var(--blue-900), var(--blue-700)); padding: 80px 0; }
         .cta-inner { text-align: center; }
-        @media (max-width: 1024px) { .countries-grid { grid-template-columns: repeat(2,1fr); } .stats-grid { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 640px) { .countries-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .countries-grid { grid-template-columns: repeat(2,1fr); } .stats-grid { gap: 32px; } }
+        @media (max-width: 640px) { .countries-grid { grid-template-columns: 1fr; } .stats-grid { flex-direction: column; align-items: center; gap: 24px; } }
       `}</style>
     </div>
   )
