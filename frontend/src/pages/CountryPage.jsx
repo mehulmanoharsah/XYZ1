@@ -79,6 +79,13 @@ const COUNTRY_BANNERS = {
     desc: 'Explore top Irish universities and technological institutes known for research excellence, close ties to global tech and pharma hubs, and supportive post-study work paths.',
     bg: 'linear-gradient(135deg, #0d5a2d 0%, #b45309 100%)',
   },
+  singapore: {
+    label: 'Singapore',
+    flag: '🇸🇬',
+    tagline: 'Global Hub of Technology, Innovation & Academic Rigour',
+    desc: 'Explore top-tier Singaporean universities and polytechnics renowned for science, technology, business management, and high-impact research in the heart of Southeast Asia.',
+    bg: 'linear-gradient(135deg, #991b1b 0%, #450a0a 100%)',
+  },
 }
 
 export default function CountryPage() {
