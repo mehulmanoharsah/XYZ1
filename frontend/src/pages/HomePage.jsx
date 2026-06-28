@@ -23,10 +23,9 @@ const COUNTRIES = [
 ]
 
 const STATS = [
-  { icon: GraduationCap, label: 'Universities & Colleges', value: '20+' },
+  { icon: GraduationCap, label: 'Universities & Colleges', value: '250+' },
   { icon: Globe,         label: 'Countries Covered',       value: '12+' },
-  { icon: Star,          label: 'Scholarships Listed',      value: '50+' },
-  { icon: Users,         label: 'Students Helped',          value: '1k+' },
+  { icon: Star,          label: 'Scholarships Listed',      value: '2000+' },
 ]
 
 export default function HomePage() {
