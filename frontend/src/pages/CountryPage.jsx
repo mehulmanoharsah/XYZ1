@@ -77,7 +77,7 @@ const COUNTRY_BANNERS = {
     flag: '🇮🇪',
     tagline: 'Vibrant Innovation, Rich Culture & EU Access',
     desc: 'Explore top Irish universities and technological institutes known for research excellence, close ties to global tech and pharma hubs, and supportive post-study work paths.',
-    bg: 'linear-gradient(135deg, #0d5a2d 0%, #f1f5f9 50%, #b45309 100%)',
+    bg: 'linear-gradient(135deg, #0d5a2d 0%, #b45309 100%)',
   },
 }
 
