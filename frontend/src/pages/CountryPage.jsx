@@ -86,6 +86,13 @@ const COUNTRY_BANNERS = {
     desc: 'Explore top-tier Singaporean universities and polytechnics renowned for science, technology, business management, and high-impact research in the heart of Southeast Asia.',
     bg: 'linear-gradient(135deg, #991b1b 0%, #450a0a 100%)',
   },
+  russia: {
+    label: 'Russia',
+    flag: '🇷🇺',
+    tagline: 'Leading Classical Education, Scientific Innovation & Affordable Excellence',
+    desc: 'Discover prestigious Russian federal and state universities offering globally recognized degrees in medicine, aerospace, nuclear science, and classical engineering fields.',
+    bg: 'linear-gradient(135deg, #1e3a8a 0%, #991b1b 100%)',
+  },
 }
 
 export default function CountryPage() {
