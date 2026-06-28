@@ -36,6 +36,7 @@ export default function FilterSidebar({ filters, onChange, onReset, provinces = 
           <option value="Ireland">Ireland</option>
           <option value="Singapore">Singapore</option>
           <option value="Russia">Russia</option>
+          <option value="South Korea">South Korea</option>
         </select>
       </div>
 

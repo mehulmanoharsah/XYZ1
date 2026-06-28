@@ -93,6 +93,13 @@ const COUNTRY_BANNERS = {
     desc: 'Discover prestigious Russian federal and state universities offering globally recognized degrees in medicine, aerospace, nuclear science, and classical engineering fields.',
     bg: 'linear-gradient(135deg, #1e3a8a 0%, #991b1b 100%)',
   },
+  'south-korea': {
+    label: 'South Korea',
+    flag: '🇰🇷',
+    tagline: 'Global Leader in High-Tech Innovation, K-Culture & Academic Prestige',
+    desc: 'Explore top South Korean research institutes and universities renowned for cutting-edge engineering, computing, biotechnology, and business administration programs.',
+    bg: 'linear-gradient(135deg, #1e3a8a 0%, #8b1c1c 100%)',
+  },
 }
 
 export default function CountryPage() {

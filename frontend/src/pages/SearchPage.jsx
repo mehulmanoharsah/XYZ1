@@ -101,6 +101,7 @@ export default function SearchPage() {
             { label: 'All Ireland', payload: { country: 'Ireland', province: '', city: '' } },
             { label: 'All Singapore', payload: { country: 'Singapore', province: '', city: '' } },
             { label: 'All Russia', payload: { country: 'Russia', province: '', city: '' } },
+            { label: 'All South Korea', payload: { country: 'South Korea', province: '', city: '' } },
             { label: 'UG Programs', payload: { level: 'UG' } },
             { label: 'PG Programs', payload: { level: 'PG' } },
             { label: 'Scholarships', payload: { scholarship: true } },

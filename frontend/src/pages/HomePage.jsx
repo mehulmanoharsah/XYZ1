@@ -19,11 +19,12 @@ const COUNTRIES = [
   { name: 'Ireland', flag: '🇮🇪', color: '#059669', desc: 'EU access & tech hubs', path: '/country/ireland', stats: '19 Institutions', disabled: false },
   { name: 'Singapore', flag: '🇸🇬', color: '#991b1b', desc: 'Innovation & global commerce', path: '/country/singapore', stats: '22 Institutions', disabled: false },
   { name: 'Russia', flag: '🇷🇺', color: '#1e3a8a', desc: 'Siberian research & medical excellence', path: '/country/russia', stats: '19 Institutions', disabled: false },
+  { name: 'South Korea', flag: '🇰🇷', color: '#0f172a', desc: 'Technological leadership & research', path: '/country/south-korea', stats: '20 Institutions', disabled: false },
 ]
 
 const STATS = [
   { icon: GraduationCap, label: 'Universities & Colleges', value: '20+' },
-  { icon: Globe,         label: 'Countries Covered',       value: '11+' },
+  { icon: Globe,         label: 'Countries Covered',       value: '12+' },
   { icon: Star,          label: 'Scholarships Listed',      value: '50+' },
   { icon: Users,         label: 'Students Helped',          value: '1k+' },
 ]
