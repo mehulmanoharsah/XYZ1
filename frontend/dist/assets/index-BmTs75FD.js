@@ -557,13 +557,20 @@ to {
         }
         .logo-text span { color: var(--blue-600); }
         .nav-links {
-          display: flex; align-items: center; gap: 4px; flex: 1;
+          display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0;
+          overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+          scrollbar-width: none; -ms-overflow-style: none;
+          padding: 4px 0;
+        }
+        .nav-links::-webkit-scrollbar {
+          display: none;
         }
         .nav-link {
           display: flex; align-items: center; gap: 6px;
           padding: 7px 14px; border-radius: var(--radius-md);
           font-size: .9rem; font-weight: 500; color: var(--gray-600);
           transition: all var(--transition); text-decoration: none;
+          flex-shrink: 0;
         }
         .nav-link:hover { color: var(--blue-600); background: var(--blue-50); }
         .nav-link.active { color: var(--blue-600); background: var(--blue-50); }
