@@ -232,7 +232,7 @@ export default function DashboardPage() {
               <div className="form-group">
                 <label className="form-label">Preferred Country</label>
                 <select className="input select" disabled={!editing} value={editing ? editForm.preferred_country : user?.preferred_country || ''} onChange={(e) => setEditForm((f) => ({ ...f, preferred_country: e.target.value }))}>
-                  {['Canada', 'USA', 'UK', 'Australia', 'Germany', 'Ireland'].map((c) => <option key={c}>{c}</option>)}
+                  {['USA', 'Canada', 'UK', 'Australia', 'Germany', 'France', 'Netherlands', 'New Zealand', 'Ireland', 'Singapore', 'Russia', 'South Korea'].map((c) => <option key={c}>{c}</option>)}
                 </select>
               </div>
             </div>

@@ -27,7 +27,7 @@ export default function FavoritesPage() {
             <h1 className="h2" style={{ marginBottom: 6 }}>Saved Universities</h1>
             <p style={{ color: 'var(--gray-500)' }}>{favorites.length} institution{favorites.length !== 1 ? 's' : ''} saved</p>
           </div>
-          <Link to="/country/canada" className="btn btn-primary">Browse More</Link>
+          <Link to="/search" className="btn btn-primary">Browse More</Link>
         </div>
 
         {favorites.length === 0 ? (
@@ -35,7 +35,7 @@ export default function FavoritesPage() {
             icon={Heart}
             title="No saved universities"
             message="Start exploring and save universities you're interested in."
-            action={<Link to="/country/canada" className="btn btn-primary">Browse Canada</Link>}
+            action={<Link to="/search" className="btn btn-primary">Browse Universities</Link>}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

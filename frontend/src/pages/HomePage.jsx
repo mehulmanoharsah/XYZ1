@@ -47,11 +47,11 @@ export default function HomePage() {
         <div className="hero-bg" />
         <div className="container hero-content">
           <h1 className="h1 hero-title animate-fadeUp" style={{ animationDelay: '.08s' }}>
-            Find Your Perfect<br />
-            <span className="hero-title-accent">University Abroad</span>
+            The Life You’ve<br />
+            <span className="hero-title-accent">Dreamed Of Begins Here</span>
           </h1>
           <p className="body-lg hero-sub animate-fadeUp" style={{ animationDelay: '.16s' }}>
-            Explore top universities and colleges across Canada and beyond. Compare programs, scholarships, and fees — all in one place.
+            Explore top universities and colleges across the globe. Compare programs, scholarships, and fees — all in one place.
           </p>
           <div className="hero-search animate-fadeUp" style={{ animationDelay: '.24s' }}>
             <SearchBar large autoNavigate placeholder="Search universities, programs, cities, provinces…" />
@@ -111,7 +111,7 @@ export default function HomePage() {
         <div className="container">
           <div className="flex-between" style={{ marginBottom: 32 }}>
             <h2 className="h2">Featured Institutions</h2>
-            <Link to="/country/canada" className="btn btn-secondary btn-sm">
+            <Link to="/search" className="btn btn-secondary btn-sm">
               View All <ArrowRight size={14} />
             </Link>
           </div>
@@ -153,8 +153,8 @@ export default function HomePage() {
             <Link to="/register" className="btn btn-lg" style={{ background: 'white', color: 'var(--blue-700)' }}>
               Get Started Free
             </Link>
-            <Link to="/country/canada" className="btn btn-lg" style={{ background: 'rgba(255,255,255,.15)', color: 'white', border: '1.5px solid rgba(255,255,255,.4)' }}>
-              Browse Canada <ArrowRight size={16} />
+            <Link to="/search" className="btn btn-lg" style={{ background: 'rgba(255,255,255,.15)', color: 'white', border: '1.5px solid rgba(255,255,255,.4)' }}>
+              Browse All Universities <ArrowRight size={16} />
             </Link>
           </div>
         </div>

@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const { load }     = useFavoritesStore()
 
   const [form, setForm] = useState({
-    full_name: '', email: '', password: '', phone: '', preferred_country: 'Canada',
+    full_name: '', email: '', password: '', phone: '', preferred_country: 'USA',
   })
   const [show,    setShow]    = useState(false)
   const [loading, setLoading] = useState(false)
@@ -94,7 +94,7 @@ export default function RegisterPage() {
               <div className="form-group">
                 <label className="form-label">Preferred Country</label>
                 <select className="input select" value={form.preferred_country} onChange={set('preferred_country')}>
-                  {['Canada', 'USA', 'UK', 'Australia', 'Germany', 'Ireland'].map((c) => (
+                  {['USA', 'Canada', 'UK', 'Australia', 'Germany', 'France', 'Netherlands', 'New Zealand', 'Ireland', 'Singapore', 'Russia', 'South Korea'].map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>

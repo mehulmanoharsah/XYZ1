@@ -40,12 +40,12 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4 className="footer-heading">Popular Provinces</h4>
-            <Link to="/country/canada?province=Ontario" className="footer-link">Ontario</Link>
-            <Link to="/country/canada?province=Quebec" className="footer-link">Quebec</Link>
-            <Link to="/country/canada?province=British Columbia" className="footer-link">British Columbia</Link>
-            <Link to="/country/canada?province=Alberta" className="footer-link">Alberta</Link>
-            <Link to="/country/canada?province=Nova Scotia" className="footer-link">Nova Scotia</Link>
+            <h4 className="footer-heading">Popular Global Cities</h4>
+            <Link to="/search?city=London" className="footer-link">London</Link>
+            <Link to="/search?city=New York City" className="footer-link">New York</Link>
+            <Link to="/search?city=Paris" className="footer-link">Paris</Link>
+            <Link to="/search?city=Sydney" className="footer-link">Sydney</Link>
+            <Link to="/search?city=Seoul" className="footer-link">Seoul</Link>
           </div>
 
           <div className="footer-col">
