@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore, useFavoritesStore } from './lib/store'
+import { Analytics } from '@vercel/analytics/react'
 
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="*"                             element={<NotFoundPage />} />
       </Routes>
       <Footer />
+      <Analytics />
     </>
   )
 }
