@@ -10,7 +10,29 @@
 const DB_NAME = "canadian_institutions";
 
 const db = connect("mongodb://localhost:27017/" + DB_NAME);
-db.dropDatabase();
+db.institutions.deleteMany({ country: "Canada" });
+db.programs.deleteMany({ institution_name: { $in: [
+  "Algoma University",
+  "Concordia University",
+  "Conestoga College",
+  "Dalhousie University",
+  "Fanshawe College",
+  "George Brown Polytechnic",
+  "Humber Polytechnic",
+  "McGill University",
+  "McMaster University",
+  "Memorial University of Newfoundland",
+  "Seneca Polytechnic",
+  "Simon Fraser University",
+  "University of Alberta",
+  "University of British Columbia",
+  "University of Calgary",
+  "University of Ottawa",
+  "University of Toronto",
+  "University of Waterloo",
+  "Western University",
+  "York University"
+] } });
 
 // ─── COLLECTION: institutions ────────────────────────────────
 db.createCollection("institutions");

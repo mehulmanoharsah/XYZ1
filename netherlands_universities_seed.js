@@ -12,6 +12,7 @@ const db = connect("mongodb://localhost:27017/" + DB_NAME);
 function inst(data) { return data; }
 
 function addPrograms(instId, instName, programs) {
+  if (!programs || programs.length === 0) return;
   programs.forEach(p => {
     p.institution_id = instId;
     p.institution_name = instName;

@@ -86,20 +86,11 @@ async def programs_for_institution(
     else:
         # 2) If it is a slug, try to resolve the institution by normalized slug first
         target_slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', institution_ref.lower().replace(" ", "-")))
-        inst_id = None
-        inst_name = None
+        inst_doc = await db.institutions.find_one({"slug": target_slug})
         
-        cursor = db.institutions.find({}, {"name": 1})
-        async for inst in cursor:
-            inst_slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', inst["name"].lower().replace(" ", "-")))
-            if inst_slug == target_slug:
-                inst_id = inst["_id"]
-                inst_name = inst["name"]
-                break
-                
-        if inst_id:
+        if inst_doc:
             # Query programs by the exact resolved institution_id (preferred)
-            f = _programs_filter(str(inst_id), None, level, None)
+            f = _programs_filter(str(inst_doc["_id"]), None, level, None)
         else:
             # Fallback: treat institution_ref as regex guess
             name_guess = institution_ref.replace("-", " ")

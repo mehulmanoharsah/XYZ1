@@ -167,12 +167,7 @@ async def get_institution(slug_or_id: str, db=Depends(get_db)):
     # 2) Fallback: match by normalized slug (handles special characters like apostrophes)
     if not doc:
         target_slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', slug_or_id.lower().replace(" ", "-")))
-        cursor = db.institutions.find({}, {"name": 1})
-        async for inst in cursor:
-            inst_slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', inst["name"].lower().replace(" ", "-")))
-            if inst_slug == target_slug:
-                doc = await db.institutions.find_one({"_id": inst["_id"]})
-                break
+        doc = await db.institutions.find_one({"slug": target_slug})
 
     # 3) Fallback: treat slug as a URL-encoded name word-by-word
     if not doc:

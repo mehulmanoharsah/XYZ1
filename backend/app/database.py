@@ -26,7 +26,27 @@ async def connect_db() -> None:
     await _db.search_history.create_index("user_id")
     await _db.search_history.create_index("created_at")
 
-    print(f"✅  MongoDB connected → {settings.db_name}")
+    # 1. Backfill missing slugs for institutions
+    import re
+    cursor = _db.institutions.find({"slug": {"$exists": False}})
+    async for doc in cursor:
+        name = doc.get("name", "")
+        slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', name.lower().replace(" ", "-")))
+        await _db.institutions.update_one({"_id": doc["_id"]}, {"$set": {"slug": slug}})
+
+    # 2. Ensure indexes on institutions and programs
+    await _db.institutions.create_index("slug", unique=True)
+    await _db.institutions.create_index("country")
+    await _db.institutions.create_index("name")
+    await _db.institutions.create_index("province")
+    await _db.institutions.create_index("city")
+    await _db.institutions.create_index("type")
+
+    await _db.programs.create_index("institution_id")
+    await _db.programs.create_index("institution_name")
+    await _db.programs.create_index("level")
+
+    print(f"✅  MongoDB connected → {settings.db_name} and indexes verified")
 
 
 async def close_db() -> None:
