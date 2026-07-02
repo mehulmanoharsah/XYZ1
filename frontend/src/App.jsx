@@ -17,6 +17,7 @@ import AdminPage      from './pages/AdminPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import TermsPage      from './pages/TermsPage'
 import ContactPage    from './pages/ContactPage'
+import FAQPage        from './pages/FAQPage'
 import NotFoundPage   from './pages/NotFoundPage'
 
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/privacy"                      element={<PrivacyPolicyPage />} />
         <Route path="/terms"                        element={<TermsPage />} />
         <Route path="/contact"                      element={<ContactPage />} />
+        <Route path="/faq"                          element={<FAQPage />} />
         <Route path="*"                             element={<NotFoundPage />} />
       </Routes>
       <Footer />

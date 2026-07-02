@@ -30,7 +30,7 @@ function ProgramCard({ prog }) {
       </div>
       <h4 className="prog-name">{prog.name}</h4>
       {prog.faculty && <p className="prog-faculty">{prog.faculty}</p>}
-      {prog.annual_fee_cad && <div className="prog-fee"><DollarSign size={13} /> CAD {prog.annual_fee_cad}/yr</div>}
+      {prog.annual_fee_cad && <div className="prog-fee"><DollarSign size={13} /> USD {Math.round(prog.annual_fee_cad * 0.73).toLocaleString()}/yr</div>}
       {prog.entry_roles?.length > 0 && (
         <div className="prog-roles">
           {prog.entry_roles.slice(0, 3).map((r, i) => <span key={i} className="prog-role">{r}</span>)}
@@ -150,7 +150,7 @@ export default function UniversityPage() {
                 <h3 className="h3" style={{ marginBottom: 16 }}>Quick Facts</h3>
                 <div className="info-table">
                   <InfoRow icon={Building2}  label="Type"            value={inst.type} />
-                  <InfoRow icon={DollarSign} label="Application Fee" value={inst.application_fee_cad ? `CAD ${inst.application_fee_cad}` : null} />
+                  <InfoRow icon={DollarSign} label="Application Fee" value={inst.application_fee_cad ? `USD ${Math.round(inst.application_fee_cad * 0.73)}` : null} />
                   <InfoRow icon={MapPin}     label="Campuses"        value={inst.campuses?.join(' · ')} />
                   <InfoRow icon={Calendar}   label="Intakes"         value={inst.intakes?.join(', ')} />
                   <InfoRow icon={Globe}      label="Website"         value={inst.website} />
@@ -258,7 +258,7 @@ export default function UniversityPage() {
                       <div className="scholarship-header">
                         <Star size={18} className="text-gold" fill="currentColor" />
                         <h3 className="h3">{s.name}</h3>
-                        {s.amount_cad && <span className="scholarship-amt">CAD {s.amount_cad?.toLocaleString()}</span>}
+                        {s.amount_cad && <span className="scholarship-amt">USD {Math.round(s.amount_cad * 0.73).toLocaleString()}</span>}
                       </div>
                       {s.criteria && <p style={{ fontSize: '.9rem', color: 'var(--gray-600)', marginTop: 6 }}>{s.criteria}</p>}
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>

@@ -97,7 +97,7 @@ export default function UniversityCard({ inst }) {
         {inst.application_fee_cad && (
           <span className="uni-card-fee">
             <DollarSign size={13} />
-            CAD {inst.application_fee_cad} app. fee
+            USD {Math.round(inst.application_fee_cad * 0.73)} app. fee
           </span>
         )}
         <span className="uni-card-cta">View Details →</span>
