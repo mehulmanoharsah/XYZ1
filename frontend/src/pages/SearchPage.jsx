@@ -36,9 +36,6 @@ export default function SearchPage() {
   const filtersKey = JSON.stringify({ ...filters, q: debouncedQ })
 
   useEffect(() => {
-    if (!debouncedQ && !filters.country && !filters.province && !filters.city && !filters.type && !filters.level) {
-      setSearched(false); return
-    }
     setLoading(true)
     setSearched(true)
     api.get('/search', {
