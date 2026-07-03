@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Shield, Users, Building2, Heart, Search, Trash2, ToggleLeft, ToggleRight, BarChart3 } from 'lucide-react'
+import { Shield, Users, Building2, Heart, Activity, Trash2, ToggleLeft, ToggleRight, BarChart3 } from 'lucide-react'
 import { useScrollTop } from '../hooks'
 import { Spinner } from '../components/common/UI'
 import toast from 'react-hot-toast'
@@ -95,7 +95,7 @@ export default function AdminPage() {
               <StatCard icon={Building2} label="Total Institutions" value={stats?.institutions} color="var(--blue-600)" />
               <StatCard icon={Users}     label="Registered Users"   value={stats?.users}        color="#7c3aed" />
               <StatCard icon={Heart}     label="Saved Universities" value={stats?.favorites}    color="#ef4444" />
-              <StatCard icon={Search}    label="Total Searches"     value={stats?.searches}     color="#d97706" />
+              <StatCard icon={Activity}  label="Total Searches"     value={stats?.searches}     color="#d97706" />
               <StatCard icon={BarChart3} label="Programs Listed"    value={stats?.programs}     color="#059669" />
               <StatCard icon={Users}     label="New Users (7d)"     value={stats?.recent_signups} color="#0891b2" />
             </div>
