@@ -5,7 +5,7 @@ import UniversityCard from '../components/university/UniversityCard'
 import FilterSidebar from '../components/search/FilterSidebar'
 import SearchBar from '../components/search/SearchBar'
 import { CardSkeleton, Pagination, EmptyState, Breadcrumb } from '../components/common/UI'
-import { useDebounce, useScrollTop, useDocumentMetadata } from '../hooks'
+import { useDebounce, useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
 import api from '../lib/api'
 
 const COUNTRY_BANNERS = {
@@ -137,6 +137,21 @@ export default function CountryPage() {
   const pageDesc = banner.desc || `Compare tuition fees, scholarships, eligibility requirements, and student life at top universities in ${banner.label} on Wellyura.`
   
   useDocumentMetadata(pageTitle, pageDesc)
+
+  const countrySchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": `Top Universities and Colleges in ${banner.label}`,
+    "description": banner.desc,
+    "url": window.location.href,
+    "itemListElement": institutions.slice(0, 10).map((inst, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${window.location.origin}/country/${countryName}/university/${inst.slug}`,
+      "name": inst.name
+    }))
+  }
+  useStructuredData(countrySchema)
 
   useEffect(() => {
     let cancelled = false

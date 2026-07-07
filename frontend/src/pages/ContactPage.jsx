@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useScrollTop, useDocumentMetadata } from '../hooks'
+import { useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, Send, ArrowLeft, Clock, Globe } from 'lucide-react'
 import api from '../lib/api'
@@ -11,6 +11,25 @@ export default function ContactPage() {
     'Contact Us — Get in Touch | Wellyura',
     "Have questions or feedback? Contact Wellyura's education advisors and support team. We're here to help you navigate your international study journey."
   )
+
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact Wellyura",
+    "description": "Have questions or feedback? Contact Wellyura's education advisors and support team.",
+    "url": window.location.href,
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "Wellyura",
+      "logo": "https://wellyura.com/wellyura_logo.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "connect@wellyura.com",
+        "contactType": "customer service"
+      }
+    }
+  }
+  useStructuredData(contactSchema)
 
   const [formData, setFormData] = useState({
     name: '',
