@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, Send, ArrowLeft, Clock, Globe } from 'lucide-react'
 import api from '../lib/api'
@@ -7,6 +7,10 @@ import toast from 'react-hot-toast'
 
 export default function ContactPage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Contact Us — Get in Touch | Wellyura',
+    "Have questions or feedback? Contact Wellyura's education advisors and support team. We're here to help you navigate your international study journey."
+  )
 
   const [formData, setFormData] = useState({
     name: '',

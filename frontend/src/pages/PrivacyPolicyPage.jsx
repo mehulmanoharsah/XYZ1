@@ -1,9 +1,13 @@
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import { Link } from 'react-router-dom'
 import { Shield, Eye, Lock, FileText, ArrowLeft } from 'lucide-react'
 
 export default function PrivacyPolicyPage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Privacy Policy | Wellyura',
+    'Read the Wellyura Privacy Policy to understand how we collect, use, and protect your personal information on our university directory portal.'
+  )
 
   return (
     <div className="page-pad">

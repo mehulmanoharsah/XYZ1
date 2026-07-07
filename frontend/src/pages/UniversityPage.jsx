@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore, useFavoritesStore } from '../lib/store'
 import { Breadcrumb, Skeleton, Spinner } from '../components/common/UI'
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 
@@ -52,6 +52,15 @@ export default function UniversityPage() {
   useScrollTop()
   const { slug, countryName } = useParams()
   const [inst,     setInst]     = useState(null)
+  
+  const pageTitle = inst 
+    ? `${inst.name} — Tuition, Programs & Scholarships | Wellyura` 
+    : 'Loading University Details | Wellyura'
+  const pageDesc = inst 
+    ? `Explore international programs, tuition fees, admission requirements, scholarships, and campus life at ${inst.name} in ${inst.city || ''}, ${inst.province || ''}, ${inst.country || ''} on Wellyura.`
+    : 'Compare global universities, tuition fees, eligibility, and scholarships on Wellyura.'
+
+  useDocumentMetadata(pageTitle, pageDesc)
   const [programs, setPrograms] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [progLoad, setProgLoad] = useState(false)

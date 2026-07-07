@@ -1,9 +1,13 @@
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import { Link } from 'react-router-dom'
 import { FileText, CheckCircle, AlertTriangle, Scale, ArrowLeft } from 'lucide-react'
 
 export default function TermsPage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Terms of Service | Wellyura',
+    'Review the Terms of Service for using the Wellyura international university directory, account registration, and informational portal.'
+  )
 
   return (
     <div className="page-pad">

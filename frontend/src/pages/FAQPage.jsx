@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import { Link } from 'react-router-dom'
 import { Search, ChevronDown, HelpCircle, ArrowLeft, Mail, MessageSquare, GraduationCap, DollarSign, User, ShieldCheck } from 'lucide-react'
 
@@ -81,6 +81,10 @@ const FAQ_DATA = [
 
 export default function FAQPage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Frequently Asked Questions | Wellyura',
+    'Got questions about studying abroad? Find answers to common questions about university tuition, applications, scholarships, and using the Wellyura portal.'
+  )
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')

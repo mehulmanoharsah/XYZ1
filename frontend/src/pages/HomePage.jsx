@@ -4,7 +4,7 @@ import { GraduationCap, MapPin, Star, ArrowRight, Globe, TrendingUp, Shield, Use
 import SearchBar from '../components/search/SearchBar'
 import UniversityCard from '../components/university/UniversityCard'
 import { CardSkeleton } from '../components/common/UI'
-import { useScrollTop } from '../hooks'
+import { useScrollTop, useDocumentMetadata } from '../hooks'
 import api from '../lib/api'
 
 const COUNTRIES = [
@@ -30,6 +30,10 @@ const STATS = [
 
 export default function HomePage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Wellyura — International University Directory',
+    'Find your perfect university or college in Canada, USA, UK, Australia, Germany, France, and beyond. Explore programs, tuition, and scholarships.'
+  )
   const navigate = useNavigate()
   const [featured, setFeatured] = useState([])
   const [loading,  setLoading]  = useState(true)

@@ -5,7 +5,7 @@ import UniversityCard from '../components/university/UniversityCard'
 import FilterSidebar from '../components/search/FilterSidebar'
 import SearchBar from '../components/search/SearchBar'
 import { CardSkeleton, Pagination, EmptyState, Breadcrumb } from '../components/common/UI'
-import { useDebounce, useScrollTop } from '../hooks'
+import { useDebounce, useScrollTop, useDocumentMetadata } from '../hooks'
 import api from '../lib/api'
 
 const COUNTRY_BANNERS = {
@@ -126,12 +126,17 @@ export default function CountryPage() {
   const debouncedQ = useDebounce(filters.q, 400)
 
   const banner = COUNTRY_BANNERS[countryName?.toLowerCase()] || {
-    label: countryName?.replace(/-/g, ' '),
+    label: countryName ? countryName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '',
     flag: '🌍',
     tagline: 'Explore universities',
-    desc: '',
+    desc: `Discover top education pathways, tuition fees, scholarships, and academic programs in ${countryName}.`,
     bg: 'linear-gradient(135deg, var(--blue-900), var(--blue-700))',
   }
+
+  const pageTitle = banner.label ? `Study in ${banner.label} — Top Universities & Colleges | Wellyura` : 'Study Abroad | Wellyura'
+  const pageDesc = banner.desc || `Compare tuition fees, scholarships, eligibility requirements, and student life at top universities in ${banner.label} on Wellyura.`
+  
+  useDocumentMetadata(pageTitle, pageDesc)
 
   useEffect(() => {
     let cancelled = false

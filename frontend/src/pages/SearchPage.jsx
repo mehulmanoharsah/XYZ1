@@ -5,11 +5,15 @@ import UniversityCard from '../components/university/UniversityCard'
 import SearchBar from '../components/search/SearchBar'
 import FilterSidebar from '../components/search/FilterSidebar'
 import { CardSkeleton, Pagination, EmptyState } from '../components/common/UI'
-import { useDebounce, useScrollTop } from '../hooks'
+import { useDebounce, useScrollTop, useDocumentMetadata } from '../hooks'
 import api from '../lib/api'
 
 export default function SearchPage() {
   useScrollTop()
+  useDocumentMetadata(
+    'Search Global Universities & Colleges | Wellyura',
+    'Search and filter hundreds of universities across Canada, USA, UK, Germany, France, and more. Filter by tuition fees, location, programs, and scholarships.'
+  )
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [results,  setResults]  = useState([])
