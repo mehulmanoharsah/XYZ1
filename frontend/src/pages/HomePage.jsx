@@ -4,7 +4,7 @@ import { GraduationCap, MapPin, Star, ArrowRight, Globe, TrendingUp, Shield, Use
 import SearchBar from '../components/search/SearchBar'
 import UniversityCard from '../components/university/UniversityCard'
 import { CardSkeleton } from '../components/common/UI'
-import { useScrollTop, useDocumentMetadata } from '../hooks'
+import { useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
 import api from '../lib/api'
 
 const COUNTRIES = [
@@ -34,6 +34,23 @@ export default function HomePage() {
     'Wellyura — International University Directory',
     'Find your perfect university or college in Canada, USA, UK, Australia, Germany, France, and beyond. Explore programs, tuition, and scholarships.'
   )
+  
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Wellyura",
+    "url": "https://wellyura.com",
+    "description": "Find your perfect university or college in Canada, USA, UK, Australia, Germany, France, and beyond.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Wellyura",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://wellyura.com/wellyura_logo.png"
+      }
+    }
+  }
+  useStructuredData(websiteSchema)
   const navigate = useNavigate()
   const [featured, setFeatured] = useState([])
   const [loading,  setLoading]  = useState(true)

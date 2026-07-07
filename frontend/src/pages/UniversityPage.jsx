@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore, useFavoritesStore } from '../lib/store'
 import { Breadcrumb, Skeleton, Spinner } from '../components/common/UI'
-import { useScrollTop, useDocumentMetadata } from '../hooks'
+import { useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 
@@ -61,6 +61,23 @@ export default function UniversityPage() {
     : 'Compare global universities, tuition fees, eligibility, and scholarships on Wellyura.'
 
   useDocumentMetadata(pageTitle, pageDesc)
+
+  const uniSchema = inst ? {
+    "@context": "https://schema.org",
+    "@type": "CollegeOrUniversity",
+    "name": inst.name,
+    "url": window.location.href,
+    "logo": "https://wellyura.com/wellyura_logo.png",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": inst.city || "",
+      "addressRegion": inst.province || "",
+      "addressCountry": inst.country || ""
+    },
+    "sameAs": inst.website || ""
+  } : null
+
+  useStructuredData(uniSchema)
   const [programs, setPrograms] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [progLoad, setProgLoad] = useState(false)

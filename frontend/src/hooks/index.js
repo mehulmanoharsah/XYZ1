@@ -147,3 +147,21 @@ export function useDocumentMetadata(title, description, image) {
   }, [title, description, image])
 }
 
+// ── Google Structured Data Schema Markup ─────────────────────
+export function useStructuredData(schemaObj) {
+  useEffect(() => {
+    if (!schemaObj) return
+
+    const script = document.createElement('script')
+    script.setAttribute('type', 'application/ld+json')
+    script.textContent = JSON.stringify(schemaObj)
+    document.head.appendChild(script)
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
+    }
+  }, [schemaObj])
+}
+
