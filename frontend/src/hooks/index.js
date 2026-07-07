@@ -93,20 +93,57 @@ export function useScrollTop() {
 }
 
 // ── Dynamic SEO Document Metadata ────────────────────────────
-export function useDocumentMetadata(title, description) {
+export function useDocumentMetadata(title, description, image) {
   useEffect(() => {
+    // 1. Document Title
     if (title) {
       document.title = title
     }
-    if (description) {
-      let metaDesc = document.querySelector('meta[name="description"]')
-      if (!metaDesc) {
-        metaDesc = document.createElement('meta')
-        metaDesc.setAttribute('name', 'description')
-        document.head.appendChild(metaDesc)
+
+    // Helper to get or create a meta tag
+    const setMetaTag = (attrName, attrValue, content) => {
+      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`)
+      if (!element) {
+        element = document.createElement('meta')
+        element.setAttribute(attrName, attrValue)
+        document.head.appendChild(element)
       }
-      metaDesc.setAttribute('content', description)
+      element.setAttribute('content', content)
     }
-  }, [title, description])
+
+    // 2. Meta Description
+    if (description) {
+      setMetaTag('name', 'description', description)
+    }
+
+    // 3. Open Graph Tags
+    if (title) {
+      setMetaTag('property', 'og:title', title)
+    }
+    if (description) {
+      setMetaTag('property', 'og:description', description)
+    }
+    
+    const ogImage = image || '/og_preview.png'
+    // Ensure absolute URL for social crawlers (Google, Facebook, Twitter require full URLs for og:image)
+    const absoluteImage = ogImage.startsWith('http') 
+      ? ogImage 
+      : `${window.location.origin}${ogImage}`
+    setMetaTag('property', 'og:image', absoluteImage)
+    
+    setMetaTag('property', 'og:url', window.location.href)
+    setMetaTag('property', 'og:type', 'website')
+
+    // 4. Twitter Cards
+    setMetaTag('name', 'twitter:card', 'summary_large_image')
+    if (title) {
+      setMetaTag('name', 'twitter:title', title)
+    }
+    if (description) {
+      setMetaTag('name', 'twitter:description', description)
+    }
+    setMetaTag('name', 'twitter:image', absoluteImage)
+
+  }, [title, description, image])
 }
 
