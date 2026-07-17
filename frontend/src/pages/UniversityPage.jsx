@@ -46,7 +46,90 @@ const TABS = [
   { id: 'scholarships', label: 'Scholarships', icon: Award },
   { id: 'contacts',   label: 'Contacts',       icon: Phone },
   { id: 'campus',     label: 'Campus Life',    icon: Users },
+  { id: 'accommodation', label: 'Accommodations', icon: Building2 },
 ]
+
+function UniversityAccommodationsTab({ institutionId, countryName }) {
+  const [accommodations, setAccommodations] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!institutionId) return
+    setLoading(true)
+    api.get('/accommodations', { params: { university_id: institutionId, limit: 10 } })
+      .then((r) => setAccommodations(r.data.data || []))
+      .catch((e) => console.error('Failed to load local housing:', e))
+      .finally(() => setLoading(false))
+  }, [institutionId])
+
+  const formatCurrency = (amount, country) => {
+    const symbol = country?.toLowerCase() === 'usa' ? 'USD' : country?.toLowerCase() === 'uk' ? 'GBP' : 'CAD'
+    return `${symbol} $${amount}`
+  }
+
+  if (loading) return <Spinner />
+
+  if (accommodations.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px 16px', background: 'var(--gray-50)', borderRadius: 'var(--radius-lg)' }}>
+        <Building2 size={36} style={{ color: 'var(--gray-400)', marginBottom: '12px' }} />
+        <h4 style={{ fontWeight: 600, color: 'var(--blue-900)', marginBottom: '8px' }}>No Nearby Housing Found</h4>
+        <p className="caption" style={{ maxWidth: '380px', margin: '0 auto 16px' }}>
+          We don't have direct partnerships or verified listings recorded right next to this campus yet.
+        </p>
+        <Link to="/accommodations" className="btn btn-secondary btn-sm">Explore All Housing</Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="animate-fadeIn">
+      <div style={{ marginBottom: '20px' }}>
+        <h3 className="h3" style={{ color: 'var(--blue-950)' }}>Verified Housing Near Campus</h3>
+        <p className="caption">These student accommodations are located close to campus with active commute or walking links.</p>
+      </div>
+      <div className="grid-cards">
+        {accommodations.map((acc) => (
+          <div key={acc._id} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+            <div style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
+              <img src={acc.images?.[0] || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80'} alt={acc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                <span className="badge badge-blue" style={{ textTransform: 'capitalize' }}>
+                  {acc.type?.replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+              <h4 style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--blue-950)', marginBottom: '8px' }}>{acc.name}</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <MapPin size={12} /> {acc.address}, {acc.city}
+              </p>
+              
+              {acc.nearby_universities?.filter(u => u.institution_id === institutionId).map((univ, idx) => (
+                <div key={idx} style={{ background: 'var(--blue-50)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--blue-700)', marginBottom: '12px' }}>
+                  <strong>{univ.distance_km} km away</strong> ({univ.commute_time_mins} min {univ.commute_mode})
+                </div>
+              ))}
+
+              <div className="divider" style={{ margin: '12px 0' }} />
+              <div className="flex-between" style={{ marginTop: 'auto' }}>
+                <div>
+                  <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--blue-900)' }}>
+                    {formatCurrency(acc.price_per_month_cad, countryName)}
+                  </span>
+                  <span className="caption">/mo</span>
+                </div>
+                <Link to={`/accommodations/${acc.slug}`} className="btn btn-secondary btn-sm" style={{ padding: '5px 10px', fontSize: '0.75rem' }}>
+                  View Room
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function UniversityPage() {
   useScrollTop()
@@ -353,6 +436,13 @@ export default function UniversityPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ── Accommodations ─── */}
+        {activeTab === 'accommodation' && (
+          <div className="tab-content animate-fadeIn">
+            <UniversityAccommodationsTab institutionId={inst.id} countryName={inst.country} />
           </div>
         )}
       </div>

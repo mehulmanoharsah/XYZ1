@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { User, Heart, Clock, Search, Key, Edit3, Save, X } from 'lucide-react'
+import { User, Heart, Clock, Search, Key, Edit3, Save, X, Home } from 'lucide-react'
 import { useAuthStore, useFavoritesStore } from '../lib/store'
 import { useScrollTop } from '../hooks'
 import toast from 'react-hot-toast'
@@ -25,6 +25,7 @@ export default function DashboardPage() {
 
   const [searchHistory, setSearchHistory] = useState([])
   const [recentlyViewed, setRecentViewed] = useState([])
+  const [housingInquiries, setHousingInquiries] = useState([])
   const [editing,   setEditing]  = useState(false)
   const [pwForm,    setPwForm]   = useState({ current_password: '', new_password: '', confirm: '' })
   const [editForm,  setEditForm] = useState({ full_name: user?.full_name || '', phone: user?.phone || '', preferred_country: user?.preferred_country || '' })
@@ -35,6 +36,7 @@ export default function DashboardPage() {
     load()
     api.get('/dashboard/search-history').then((r) => setSearchHistory(r.data)).catch(() => {})
     api.get('/dashboard/recently-viewed').then((r) => setRecentViewed(r.data)).catch(() => {})
+    api.get('/accommodations/my-inquiries').then((r) => setHousingInquiries(r.data)).catch(() => {})
   }, [])
 
   const saveProfile = async () => {
@@ -63,6 +65,7 @@ export default function DashboardPage() {
   const TABS = [
     { id: 'overview',  label: 'Overview',   icon: User },
     { id: 'saved',     label: `Saved (${favorites.length})`, icon: Heart },
+    { id: 'housing',   label: `Accommodations (${housingInquiries.length})`, icon: Home },
     { id: 'history',   label: 'History',    icon: Search },
     { id: 'settings',  label: 'Settings',   icon: Key },
   ]
@@ -196,6 +199,52 @@ export default function DashboardPage() {
                     <span style={{ flex: 1 }}>{h.query}</span>
                     <span style={{ fontSize: '.75rem', color: 'var(--gray-400)' }}>{new Date(h.created_at).toLocaleDateString()}</span>
                   </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Housing */}
+        {tab === 'housing' && (
+          <div className="animate-fadeIn">
+            {housingInquiries.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>
+                <Home size={48} style={{ margin: '0 auto 16px', opacity: .3 }} />
+                <p style={{ marginBottom: '16px' }}>No student accommodation inquiries submitted yet.</p>
+                <Link to="/accommodations" className="btn btn-primary">Explore Accommodations</Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {housingInquiries.map((inq) => (
+                  <div key={inq._id} className="card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                      <h4 style={{ fontWeight: 600, color: 'var(--blue-950)', marginBottom: '6px' }}>{inq.accommodation_name}</h4>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--gray-700)', marginBottom: '8px' }}>
+                        Requested Room: <strong>{inq.room_type}</strong>
+                      </p>
+                      <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', color: 'var(--gray-500)', flexWrap: 'wrap' }}>
+                        <span>Check-in: <strong>{inq.check_in_date}</strong></span>
+                        <span>Check-out: <strong>{inq.check_out_date}</strong></span>
+                      </div>
+                      {inq.message && (
+                        <p style={{ fontSize: '0.8rem', fontStyle: 'italic', background: 'var(--gray-50)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginTop: '8px', color: 'var(--gray-600)' }}>
+                          "{inq.message}"
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right', marginLeft: 'auto' }}>
+                      <span className={`badge ${
+                        inq.status === 'pending' ? 'badge-gold' : 
+                        inq.status === 'reviewed' ? 'badge-blue' : 'badge-green'
+                      }`} style={{ textTransform: 'capitalize' }}>
+                        {inq.status}
+                      </span>
+                      <span className="caption" style={{ display: 'block', marginTop: '6px' }}>
+                        Sent: {new Date(inq.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

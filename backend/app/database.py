@@ -46,6 +46,14 @@ async def connect_db() -> None:
     await _db.programs.create_index("institution_name")
     await _db.programs.create_index("level")
 
+    # Ensure indexes on accommodations & inquiries
+    await _db.accommodations.create_index("slug", unique=True)
+    await _db.accommodations.create_index("country")
+    await _db.accommodations.create_index("city")
+    await _db.accommodations.create_index("type")
+    await _db.accommodations.create_index("nearby_universities.institution_id")
+    await _db.housing_inquiries.create_index("user_id")
+
     print(f"✅  MongoDB connected → {settings.db_name} and indexes verified")
 
 

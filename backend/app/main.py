@@ -13,7 +13,7 @@ import re
 
 from app.config import get_settings
 from app.database import close_db, connect_db, get_db
-from app.api import admin, auth, dashboard, favorites, institutions, programs, search, contact
+from app.api import admin, auth, dashboard, favorites, institutions, programs, search, contact, accommodations
 
 settings = get_settings()
 
@@ -58,6 +58,7 @@ app.include_router(favorites.router)
 app.include_router(dashboard.router)
 app.include_router(admin.router)
 app.include_router(contact.router)
+app.include_router(accommodations.router)
 
 
 # ── Health check ──────────────────────────────────────────────

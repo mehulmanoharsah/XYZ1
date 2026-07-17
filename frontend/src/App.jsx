@@ -19,6 +19,8 @@ import TermsPage      from './pages/TermsPage'
 import ContactPage    from './pages/ContactPage'
 import FAQPage        from './pages/FAQPage'
 import NotFoundPage   from './pages/NotFoundPage'
+import AccommodationPage from './pages/AccommodationPage'
+import AccommodationDetailPage from './pages/AccommodationDetailPage'
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuthStore()
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="/country/:countryName"         element={<CountryPage />} />
         <Route path="/country/:countryName/university/:slug" element={<UniversityPage />} />
         <Route path="/university/:slug"             element={<UniversityPage />} />
+        <Route path="/accommodations"               element={<AccommodationPage />} />
+        <Route path="/accommodations/:slug"         element={<AccommodationDetailPage />} />
         <Route path="/search"                       element={<SearchPage />} />
         <Route path="/login"                        element={<LoginPage />} />
         <Route path="/register"                     element={<RegisterPage />} />

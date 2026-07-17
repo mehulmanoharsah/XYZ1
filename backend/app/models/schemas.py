@@ -69,3 +69,13 @@ class ContactSubmissionRequest(BaseModel):
     subject: str = Field(..., min_length=3, max_length=200)
     message: str = Field(..., min_length=10, max_length=2000)
 
+
+# ── Accommodation Inquiries ─────────────────────────────────
+class AccommodationInquiryRequest(BaseModel):
+    accommodation_id: str
+    room_type: str
+    check_in_date: str
+    check_out_date: str
+    message: Optional[str] = Field(None, max_length=1000)
+
+
