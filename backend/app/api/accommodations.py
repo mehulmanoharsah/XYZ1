@@ -29,6 +29,7 @@ async def list_accommodations(
     type: str | None = Query(None, description="hostel, residence_hall, apartment, homestay"),
     price_max: int | None = Query(None, description="Max budget per month"),
     university_id: str | None = Query(None, description="Filter by accommodations near this university ID"),
+    gender_policy: str | None = Query(None, description="Filter by gender policy (e.g. female_only)"),
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=50),
     db=Depends(get_db),
@@ -41,6 +42,8 @@ async def list_accommodations(
         f["city"] = {"$regex": re.escape(city.strip()), "$options": "i"}
     if type:
         f["type"] = type.strip()
+    if gender_policy:
+        f["gender_policy"] = gender_policy.strip()
     if price_max is not None:
         f["price_per_month_cad"] = {"$lte": price_max}
     

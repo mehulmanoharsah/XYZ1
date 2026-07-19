@@ -23,6 +23,7 @@ export default function AccommodationPage() {
   const [city, setCity] = useState('')
   const [type, setType] = useState('')
   const [priceMax, setPriceMax] = useState('')
+  const [femaleOnly, setFemaleOnly] = useState(false)
 
   // UI state
   const [showFiltersMobile, setShowFiltersMobile] = useState(false)
@@ -37,7 +38,8 @@ export default function AccommodationPage() {
         country: country || undefined,
         city: city || undefined,
         type: type || undefined,
-        price_max: priceMax ? parseInt(priceMax) : undefined
+        price_max: priceMax ? parseInt(priceMax) : undefined,
+        gender_policy: femaleOnly ? 'female_only' : undefined
       }
       const response = await api.get('/accommodations', { params })
       setAccommodations(response.data.data || [])
@@ -54,7 +56,7 @@ export default function AccommodationPage() {
   useEffect(() => {
     setPage(1)
     fetchAccommodations(1)
-  }, [country, city, type, priceMax])
+  }, [country, city, type, priceMax, femaleOnly])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -68,6 +70,7 @@ export default function AccommodationPage() {
     setCity('')
     setType('')
     setPriceMax('')
+    setFemaleOnly(false)
     setPage(1)
   }
 
@@ -177,6 +180,21 @@ export default function AccommodationPage() {
                 Shows results up to maximum price.
               </div>
             </div>
+
+            {/* Girls Only Filter */}
+            <div className="form-group" style={{ marginTop: '24px', borderTop: '1px solid var(--gray-100)', paddingTop: '16px' }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                <input 
+                  type="checkbox" 
+                  checked={femaleOnly} 
+                  onChange={(e) => setFemaleOnly(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#db2777' }}
+                />
+                <span style={{ fontSize: '0.925rem', color: 'var(--gray-800)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                  🎀 Girls Only
+                </span>
+              </label>
+            </div>
           </aside>
 
           {/* ── Main Content Area ───────────────────────────────── */}
@@ -217,7 +235,7 @@ export default function AccommodationPage() {
                           alt={acc.name} 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
-                        <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                        <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end' }}>
                           <span className={`badge ${
                             acc.type === 'residence_hall' ? 'badge-blue' :
                             acc.type === 'hostel' ? 'badge-green' :
@@ -227,6 +245,11 @@ export default function AccommodationPage() {
                              acc.type === 'hostel' ? 'Hostel' :
                              acc.type === 'apartment' ? 'Apartment' : 'Co-living'}
                           </span>
+                          {acc.gender_policy === 'female_only' && (
+                            <span className="badge" style={{ background: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8', fontWeight: 600 }}>
+                              🎀 Girls Only
+                            </span>
+                          )}
                         </div>
                         <div style={{ position: 'absolute', bottom: '12px', left: '12px', zIndex: 2, background: 'rgba(10,22,40,0.75)', color: 'var(--white)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', backdropFilter: 'blur(4px)' }}>
                           <Star size={14} fill="var(--gold)" color="var(--gold)" />

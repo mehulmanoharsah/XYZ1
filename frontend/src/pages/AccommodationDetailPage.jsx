@@ -118,10 +118,15 @@ export default function AccommodationDetailPage() {
 
       {/* ── Title block ───────────────────────────────────────── */}
       <header style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
           <span className="badge badge-blue" style={{ textTransform: 'capitalize' }}>
             {accommodation.type?.replace('_', ' ')}
           </span>
+          {accommodation.gender_policy === 'female_only' && (
+            <span className="badge" style={{ background: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8', fontWeight: 600 }}>
+              🎀 Girls Only
+            </span>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: 'var(--gray-600)' }}>
             <Star size={14} fill="var(--gold)" color="var(--gold)" />
             <strong>{accommodation.rating}</strong> ({accommodation.reviews_count} reviews)

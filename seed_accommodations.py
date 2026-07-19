@@ -163,6 +163,7 @@ housing_templates = [
     {
         "name": "Mont-Royal Co-Living Rooms",
         "type": "homestay",
+        "gender_policy": "female_only",
         "city": "Montreal",
         "province": "Quebec",
         "country": "Canada",
@@ -273,6 +274,8 @@ for template in housing_templates:
     acc_doc = template.copy()
     acc_doc["slug"] = slug
     acc_doc["nearby_universities"] = nearby
+    if "gender_policy" not in acc_doc:
+        acc_doc["gender_policy"] = "any"
     accommodations_to_insert.append(acc_doc)
 
 # Let's add extra ones so we have more items
@@ -323,7 +326,8 @@ for i in range(1, 6):
         "reviews_count": original["reviews_count"] - i * 5,
         "description": f"Annex expansion of {original['name']}. Located in the vibrant neighborhoods of {original['city']}, providing excellent links to class.",
         "images": [original["images"][0]],
-        "nearby_universities": nearby
+        "nearby_universities": nearby,
+        "gender_policy": "female_only" if i == 4 else original.get("gender_policy", "any")
     }
     accommodations_to_insert.append(acc_doc)
 
