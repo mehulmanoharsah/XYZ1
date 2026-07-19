@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 10080  # 7 days
 
     # Comma-separated origins stored as string, exposed as list
-    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,https://www.wellyura.com,https://wellyura.com"
 
     class Config:
         env_file = ".env"
