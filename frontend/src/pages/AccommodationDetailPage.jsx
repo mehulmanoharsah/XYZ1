@@ -23,6 +23,13 @@ export default function AccommodationDetailPage() {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // Reviews State
+  const [reviews, setReviews] = useState([])
+  const [reviewEligible, setReviewEligible] = useState(false)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewError, setReviewError] = useState('')
+
   // Document metadata hooks will be updated once accommodation is loaded
   useDocumentMetadata(
     accommodation ? `${accommodation.name} | Student Housing` : 'Student Housing Details',
@@ -51,6 +58,52 @@ export default function AccommodationDetailPage() {
     }
     fetchDetail()
   }, [slug])
+
+  useEffect(() => {
+    if (!accommodation) return
+
+    const fetchReviewsAndEligibility = async () => {
+      try {
+        const reviewsRes = await api.get(`/accommodations/${accommodation.id}/reviews`)
+        setReviews(reviewsRes.data || [])
+
+        if (user) {
+          const eligRes = await api.get(`/accommodations/${accommodation.id}/review-eligibility`)
+          setReviewEligible(eligRes.data.eligible)
+        }
+      } catch (err) {
+        console.error('Failed to load reviews:', err)
+      }
+    }
+    fetchReviewsAndEligibility()
+  }, [accommodation, user])
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault()
+    setReviewError('')
+    try {
+      const response = await api.post(`/accommodations/${accommodation.id}/reviews`, {
+        rating: reviewRating,
+        comment: reviewComment
+      })
+      toast.success('Review submitted successfully!')
+      setReviewComment('')
+      setReviewRating(5)
+      
+      const reviewsRes = await api.get(`/accommodations/${accommodation.id}/reviews`)
+      setReviews(reviewsRes.data || [])
+      setReviewEligible(false)
+      
+      setAccommodation(prev => ({
+        ...prev,
+        rating: response.data.rating,
+        reviews_count: response.data.reviews_count
+      }))
+    } catch (err) {
+      console.error('Failed to submit review:', err)
+      setReviewError(err.response?.data?.detail || 'Failed to submit review.')
+    }
+  }
 
   const handleInquirySubmit = async (e) => {
     e.preventDefault()
@@ -365,6 +418,116 @@ export default function AccommodationDetailPage() {
         </aside>
 
       </div>
+
+      {/* Reviews Section */}
+      <section style={{ marginTop: '56px', borderTop: '1px solid var(--gray-100)', paddingTop: '40px', marginBottom: '60px' }}>
+        <h2 className="h2" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.5rem', color: 'var(--blue-950)' }}>
+          <Star size={24} fill="var(--gold)" color="var(--gold)" />
+          <span>Student Reviews ({reviews.length})</span>
+        </h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '48px', alignItems: 'start' }}>
+          {/* Reviews list */}
+          <div>
+            {reviews.length === 0 ? (
+              <div style={{ padding: '40px 0', color: 'var(--gray-400)', textAlign: 'center' }}>
+                <p>No reviews submitted for this property yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {reviews.map((rev) => (
+                  <div key={rev._id} style={{ borderBottom: '1px solid var(--gray-100)', paddingBottom: '20px' }}>
+                    <div className="flex-between" style={{ marginBottom: '8px' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--blue-950)' }}>{rev.user_name}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--gray-400)' }}>
+                        {new Date(rev.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '2px', marginBottom: '10px' }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          size={14} 
+                          fill={i < rev.rating ? "var(--gold)" : "none"} 
+                          color={i < rev.rating ? "var(--gold)" : "var(--gray-300)"} 
+                        />
+                      ))}
+                    </div>
+                    <p style={{ color: 'var(--gray-600)', fontSize: '0.925rem', lineHeight: 1.6 }}>{rev.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Write a review form */}
+          <aside className="card" style={{ padding: '24px', background: 'var(--gray-50)', border: '1px solid var(--gray-100)' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--blue-950)', marginBottom: '16px' }}>
+              Write a Review
+            </h3>
+
+            {user ? (
+              reviewEligible ? (
+                <form onSubmit={handleReviewSubmit}>
+                  {/* Rating Selection */}
+                  <div className="form-group" style={{ marginBottom: '16px' }}>
+                    <label className="form-label">Your Rating</label>
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <Star 
+                            size={28} 
+                            fill={star <= reviewRating ? "var(--gold)" : "none"} 
+                            color={star <= reviewRating ? "var(--gold)" : "var(--gray-300)"} 
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Comment */}
+                  <div className="form-group" style={{ marginBottom: '16px' }}>
+                    <label className="form-label">Review Comment</label>
+                    <textarea
+                      className="input"
+                      rows={4}
+                      placeholder="Share your experience living at this student accommodation..."
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      required
+                      style={{ background: 'white' }}
+                    />
+                  </div>
+
+                  {reviewError && (
+                    <p style={{ color: 'red', fontSize: '0.85rem', marginBottom: '12px' }}>{reviewError}</p>
+                  )}
+
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                    Submit Review
+                  </button>
+                </form>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--gray-500)', fontSize: '0.875rem' }}>
+                  <Lock size={20} style={{ margin: '0 auto 8px', opacity: 0.5, display: 'block' }} />
+                  <p style={{ lineHeight: 1.5 }}>
+                    Only verified students who have a booking inquiry record here can submit a review.
+                  </p>
+                </div>
+              )
+            ) : (
+              <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--gray-500)', fontSize: '0.875rem' }}>
+                <p>Please log in to submit a review.</p>
+              </div>
+            )}
+          </aside>
+        </div>
+      </section>
 
     </div>
   )

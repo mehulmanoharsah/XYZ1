@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.database import get_db
 from app.middleware.auth_middleware import get_current_user, get_admin_user
-from app.models.schemas import AccommodationInquiryRequest, OkResponse
+from app.models.schemas import AccommodationInquiryRequest, OkResponse, AccommodationReviewRequest
 from app.utils.helpers import serialize_doc, serialize_list
 
 router = APIRouter(prefix="/api/accommodations", tags=["Accommodations"])
@@ -168,3 +168,103 @@ async def create_inquiry(
     result = await db.housing_inquiries.insert_one(doc)
     doc["_id"] = result.inserted_id
     return serialize_doc(doc)
+
+
+# ── GET /api/accommodations/{id}/reviews ──────────────────────
+@router.get("/{id}/reviews", summary="Get all reviews for an accommodation")
+async def get_reviews(id: str, db=Depends(get_db)):
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=400, detail="Invalid accommodation ID format.")
+    docs = await db.accommodation_reviews.find({"accommodation_id": id}).sort("created_at", -1).to_list(100)
+    return serialize_list(docs)
+
+
+# ── GET /api/accommodations/{id}/review-eligibility ───────────
+@router.get("/{id}/review-eligibility", summary="Check if user can review this accommodation")
+async def check_review_eligibility(
+    id: str,
+    current_user: dict = Depends(get_current_user),
+    db=Depends(get_db),
+):
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=400, detail="Invalid accommodation ID format.")
+    
+    # Check if user has an inquiry record (for testing, we count pending, confirmed, or completed)
+    inquiry = await db.housing_inquiries.find_one({
+        "user_id": current_user["id"],
+        "accommodation_id": id,
+        "status": {"$in": ["approved", "confirmed", "completed", "pending"]}
+    })
+    
+    # Check if they already reviewed
+    existing_review = await db.accommodation_reviews.find_one({
+        "user_id": current_user["id"],
+        "accommodation_id": id
+    })
+    
+    eligible = (inquiry is not None) and (existing_review is None)
+    return {
+        "eligible": eligible,
+        "has_inquiry": inquiry is not None,
+        "already_reviewed": existing_review is not None
+    }
+
+
+# ── POST /api/accommodations/{id}/reviews ─────────────────────
+@router.post("/{id}/reviews", summary="Submit a review for an accommodation")
+async def submit_review(
+    id: str,
+    payload: AccommodationReviewRequest,
+    current_user: dict = Depends(get_current_user),
+    db=Depends(get_db),
+):
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=400, detail="Invalid accommodation ID format.")
+        
+    accommodation = await db.accommodations.find_one({"_id": ObjectId(id)})
+    if not accommodation:
+        raise HTTPException(status_code=404, detail="Accommodation not found.")
+        
+    # Verify booking inquiry record exists
+    inquiry = await db.housing_inquiries.find_one({
+        "user_id": current_user["id"],
+        "accommodation_id": id,
+        "status": {"$in": ["approved", "confirmed", "completed", "pending"]}
+    })
+    if not inquiry:
+        raise HTTPException(
+            status_code=403, 
+            detail="You can only review accommodations where you have a booking inquiry record (lived there)."
+        )
+        
+    # Check if already reviewed
+    existing_review = await db.accommodation_reviews.find_one({
+        "user_id": current_user["id"],
+        "accommodation_id": id
+    })
+    if existing_review:
+        raise HTTPException(status_code=400, detail="You have already submitted a review for this accommodation.")
+        
+    # Insert review
+    review_doc = {
+        "accommodation_id": id,
+        "user_id": current_user["id"],
+        "user_name": current_user.get("full_name", "Student"),
+        "rating": payload.rating,
+        "comment": payload.comment,
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.accommodation_reviews.insert_one(review_doc)
+    
+    # Recalculate average rating and count
+    all_reviews = await db.accommodation_reviews.find({"accommodation_id": id}).to_list(1000)
+    reviews_count = len(all_reviews)
+    avg_rating = round(sum(r["rating"] for r in all_reviews) / reviews_count, 1) if reviews_count else 5.0
+    
+    await db.accommodations.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {"rating": avg_rating, "reviews_count": reviews_count}}
+    )
+    
+    return {"message": "Review submitted successfully!", "rating": avg_rating, "reviews_count": reviews_count}
