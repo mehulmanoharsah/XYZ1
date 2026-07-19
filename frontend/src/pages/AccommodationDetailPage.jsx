@@ -144,11 +144,11 @@ export default function AccommodationDetailPage() {
       {/* ── Images Grid ───────────────────────────────────────── */}
       <section style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '16px', marginBottom: '40px', height: '450px' }}>
         {/* Large view */}
-        <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', backgroundColor: 'var(--gray-100)' }}>
+        <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', backgroundColor: 'var(--gray-950)' }}>
           <img 
             src={activeImage || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80'} 
             alt={accommodation.name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all var(--transition)' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'all var(--transition)' }}
           />
         </div>
 
@@ -164,12 +164,12 @@ export default function AccommodationDetailPage() {
                 overflow: 'hidden', 
                 height: '75px', 
                 padding: 0,
-                background: 'none',
+                background: 'var(--gray-900)',
                 opacity: activeImage === img ? 1 : 0.75,
                 transition: 'all var(--transition)'
               }}
             >
-              <img src={img} alt={`view-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={img} alt={`view-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: 'var(--gray-900)' }} />
             </button>
           ))}
         </div>
