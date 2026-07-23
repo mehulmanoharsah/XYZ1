@@ -112,16 +112,17 @@ sw18_doc = {
     "reviews_count": 0,
     "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
     "images": [
+        "/images/sw18-female-homestay/1.jpeg",
         "/images/sw18-female-homestay/2.jpeg",
         "/images/sw18-female-homestay/3.jpeg",
         "/images/sw18-female-homestay/4.jpeg",
         "/images/sw18-female-homestay/6.jpeg",
         "/images/sw18-female-homestay/7.jpeg",
-        "/images/sw18-female-homestay/34.jpeg",
+        "/images/sw18-female-homestay/8.jpeg",
+        "/images/sw18-female-homestay/9.jpeg",
         "/images/sw18-female-homestay/21345.jpeg",
         "/images/sw18-female-homestay/2345t.jpeg",
-        "/images/sw18-female-homestay/asd.jpeg",
-        "/images/sw18-female-homestay/asdf.jpeg"
+        "/images/sw18-female-homestay/34.jpeg"
     ],
     "nearby_universities": nearby,
     "contact_email": "robydot@gmail.com"
