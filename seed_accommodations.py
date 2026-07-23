@@ -53,7 +53,7 @@ knares_doc = {
     "province": "England",
     "country": "UK",
     "address": "25 Knaresborough Drive, London, SW18 4UT, UK",
-    "price_per_month_cad": 1560,
+    "price_per_month_cad": 900,
     "room_types": [{
         "name": "Standard Double Room",
         "price_per_month": 900,

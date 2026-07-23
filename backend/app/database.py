@@ -79,15 +79,24 @@ async def connect_db() -> None:
                     {"$set": {
                         "name": "Knaresborough",
                         "slug": "knaresborough",
-                        "description": "Knaresborough offers comfortable, modern co-living student accommodation at 25 Knaresborough Drive. Rent includes all utility bills (electricity, heating, water, and high-speed internet), making budgeting easy for students. Conveniently located near public transport for commute to London universities."
+                        "description": "Knaresborough offers comfortable, modern co-living student accommodation at 25 Knaresborough Drive. Rent includes all utility bills (electricity, heating, water, and high-speed internet), making budgeting easy for students. Conveniently located near public transport for commute to London universities.",
+                        "price_per_month_cad": 900
                     }}
                 )
                 print("Successfully corrected Knaresborough Residence in the database.")
             else:
                 print("Knaresborough accommodation not found. Seeding it...")
                 await seed_knaresborough(_db)
+        else:
+            # Force update price to 900 if it is incorrect
+            if knares_exists.get("price_per_month_cad") != 900:
+                await _db.accommodations.update_one(
+                    {"slug": "knaresborough"},
+                    {"$set": {"price_per_month_cad": 900}}
+                )
+                print("Successfully corrected Knaresborough price to 900 in the database.")
     except Exception as e:
-        print(f"⚠️ Failed to ensure Knaresborough is seeded: {e}")
+        print(f"⚠️ Failed to ensure Knaresborough is seeded/updated: {e}")
 
     print(f"✅  MongoDB connected → {settings.db_name} and indexes verified")
 
@@ -137,7 +146,7 @@ async def seed_knaresborough(db: AsyncIOMotorDatabase) -> None:
         "province": "England",
         "country": "UK",
         "address": "25 Knaresborough Drive, London, SW18 4UT, UK",
-        "price_per_month_cad": 1560,
+        "price_per_month_cad": 900,
         "room_types": [{
             "name": "Standard Double Room",
             "price_per_month": 900,
