@@ -54,6 +54,19 @@ async def connect_db() -> None:
     await _db.accommodations.create_index("nearby_universities.institution_id")
     await _db.housing_inquiries.create_index("user_id")
 
+    # Rename 'Knaresborough Residence' to 'Knaresborough' if it exists
+    try:
+        await _db.accommodations.update_one(
+            {"name": "Knaresborough Residence"},
+            {"$set": {
+                "name": "Knaresborough",
+                "slug": "knaresborough",
+                "description": "Knaresborough offers comfortable, modern co-living student accommodation at 25 Knaresborough Drive. Rent includes all utility bills (electricity, heating, water, and high-speed internet), making budgeting easy for students. Conveniently located near public transport for commute to London universities."
+            }}
+        )
+    except Exception as e:
+        print(f"⚠️ Failed to rename Knaresborough Residence: {e}")
+
     # Auto-seed accommodations if collection is empty
     accomm_count = await _db.accommodations.count_documents({})
     if accomm_count == 0:
