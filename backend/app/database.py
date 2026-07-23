@@ -59,9 +59,9 @@ async def connect_db() -> None:
     await safe_create_index(_db.accommodations, "nearby_universities.institution_id")
     await safe_create_index(_db.housing_inquiries, "user_id")
 
-    # Clean up mock/fake accommodations (keep only Knaresborough)
+    # Clean up mock/fake accommodations (keep only Knaresborough and SW18 Female Student Homestay)
     try:
-        delete_result = await _db.accommodations.delete_many({"slug": {"$ne": "knaresborough"}})
+        delete_result = await _db.accommodations.delete_many({"slug": {"$nin": ["knaresborough", "sw18-female-homestay"]}})
         if delete_result.deleted_count > 0:
             print(f"Cleaned up {delete_result.deleted_count} mock/fake accommodations.")
     except Exception as e:
@@ -97,6 +97,15 @@ async def connect_db() -> None:
                 print("Successfully corrected Knaresborough price to 900 in the database.")
     except Exception as e:
         print(f"⚠️ Failed to ensure Knaresborough is seeded/updated: {e}")
+
+    # Ensure SW18 Female Student Homestay is seeded
+    try:
+        sw18_exists = await _db.accommodations.find_one({"slug": "sw18-female-homestay"})
+        if not sw18_exists:
+            print("SW18 Female Student Homestay accommodation not found. Seeding it...")
+            await seed_sw18_homestay(_db)
+    except Exception as e:
+        print(f"⚠️ Failed to ensure SW18 Female Student Homestay is seeded: {e}")
 
     print(f"✅  MongoDB connected → {settings.db_name} and indexes verified")
 
@@ -172,3 +181,66 @@ async def seed_knaresborough(db: AsyncIOMotorDatabase) -> None:
     }
     await db.accommodations.insert_one(knares_doc)
     print("Successfully seeded Knaresborough accommodation.")
+
+
+async def seed_sw18_homestay(db: AsyncIOMotorDatabase) -> None:
+    # Resolve university IDs dynamically
+    imperial = await db.institutions.find_one({"name": {"$regex": "Imperial College London", "$options": "i"}})
+    kings = await db.institutions.find_one({"name": {"$regex": "King's College London", "$options": "i"}})
+
+    nearby = []
+    if imperial:
+        nearby.append({
+            "institution_id": imperial["_id"],
+            "institution_name": imperial["name"],
+            "distance_km": 5.4,
+            "commute_time_mins": 25,
+            "commute_mode": "subway"
+        })
+    if kings:
+        nearby.append({
+            "institution_id": kings["_id"],
+            "institution_name": kings["name"],
+            "distance_km": 6.8,
+            "commute_time_mins": 30,
+            "commute_mode": "subway"
+        })
+
+    sw18_doc = {
+        "name": "SW18 Female Student Homestay",
+        "slug": "sw18-female-homestay",
+        "type": "homestay",
+        "gender_policy": "female_only",
+        "city": "London",
+        "province": "England",
+        "country": "UK",
+        "address": "SW18, London, UK",
+        "price_per_month_cad": 900,
+        "room_types": [{
+            "name": "Standard Single Room",
+            "price_per_month": 900,
+            "available_rooms": 1,
+            "amenities": ["Single Bed", "Study Desk", "All Bills Included"]
+        }],
+        "amenities": ["High-Speed Wi-Fi", "Fully Furnished Kitchen", "Central Heating", "Laundry Access"],
+        "rules": {
+            "guest_policy": "No overnight guests without notice",
+            "quiet_hours": "10 PM - 8 AM",
+            "pets_allowed": False,
+            "custom_rules": [
+                "Female tenant only",
+                "No working from home",
+                "Office hours only"
+            ]
+        },
+        "rating": 5.0,
+        "reviews_count": 0,
+        "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
+        "images": [
+            "/images/knaresborough/image1.jpeg"
+        ],
+        "nearby_universities": nearby,
+        "contact_email": "robydot@gmail.com"
+    }
+    await db.accommodations.insert_one(sw18_doc)
+    print("Successfully seeded SW18 Female Student Homestay accommodation.")

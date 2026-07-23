@@ -80,4 +80,45 @@ knares_doc = {
 
 db.accommodations.insert_one(knares_doc)
 print("Successfully seeded Knaresborough accommodation.")
+
+sw18_doc = {
+    "name": "SW18 Female Student Homestay",
+    "slug": "sw18-female-homestay",
+    "type": "homestay",
+    "gender_policy": "female_only",
+    "city": "London",
+    "province": "England",
+    "country": "UK",
+    "address": "SW18, London, UK",
+    "price_per_month_cad": 900,
+    "room_types": [{
+        "name": "Standard Single Room",
+        "price_per_month": 900,
+        "available_rooms": 1,
+        "amenities": ["Single Bed", "Study Desk", "All Bills Included"]
+    }],
+    "amenities": ["High-Speed Wi-Fi", "Fully Furnished Kitchen", "Central Heating", "Laundry Access"],
+    "rules": {
+        "guest_policy": "No overnight guests without notice",
+        "quiet_hours": "10 PM - 8 AM",
+        "pets_allowed": False,
+        "custom_rules": [
+            "Female tenant only",
+            "No working from home",
+            "Office hours only"
+        ]
+    },
+    "rating": 5.0,
+    "reviews_count": 0,
+    "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
+    "images": [
+        "/images/knaresborough/image1.jpeg"
+    ],
+    "nearby_universities": nearby,
+    "contact_email": "robydot@gmail.com"
+}
+
+db.accommodations.insert_one(sw18_doc)
+print("Successfully seeded SW18 Female Student Homestay accommodation.")
+
 client.close()
