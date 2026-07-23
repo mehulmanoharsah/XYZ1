@@ -98,14 +98,29 @@ async def connect_db() -> None:
     except Exception as e:
         print(f"⚠️ Failed to ensure Knaresborough is seeded/updated: {e}")
 
-    # Ensure SW18 Female Student Homestay is seeded
+    # Ensure SW18 Female Student Homestay is seeded and corrected
     try:
         sw18_exists = await _db.accommodations.find_one({"slug": "sw18-female-homestay"})
         if not sw18_exists:
             print("SW18 Female Student Homestay accommodation not found. Seeding it...")
             await seed_sw18_homestay(_db)
+        else:
+            # Force update images to include all 4 photos if they are missing
+            if len(sw18_exists.get("images", [])) < 4:
+                await _db.accommodations.update_one(
+                    {"slug": "sw18-female-homestay"},
+                    {"$set": {
+                        "images": [
+                            "/images/knaresborough/image1.jpeg",
+                            "/images/knaresborough/image2.jpeg",
+                            "/images/knaresborough/image3.jpeg",
+                            "/images/knaresborough/image4.jpeg"
+                        ]
+                    }}
+                )
+                print("Successfully updated SW18 Female Student Homestay images in the database.")
     except Exception as e:
-        print(f"⚠️ Failed to ensure SW18 Female Student Homestay is seeded: {e}")
+        print(f"⚠️ Failed to ensure SW18 Female Student Homestay is seeded/updated: {e}")
 
     print(f"✅  MongoDB connected → {settings.db_name} and indexes verified")
 
@@ -237,7 +252,10 @@ async def seed_sw18_homestay(db: AsyncIOMotorDatabase) -> None:
         "reviews_count": 0,
         "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
         "images": [
-            "/images/knaresborough/image1.jpeg"
+            "/images/knaresborough/image1.jpeg",
+            "/images/knaresborough/image2.jpeg",
+            "/images/knaresborough/image3.jpeg",
+            "/images/knaresborough/image4.jpeg"
         ],
         "nearby_universities": nearby,
         "contact_email": "robydot@gmail.com"

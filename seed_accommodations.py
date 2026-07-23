@@ -112,7 +112,10 @@ sw18_doc = {
     "reviews_count": 0,
     "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
     "images": [
-        "/images/knaresborough/image1.jpeg"
+        "/images/knaresborough/image1.jpeg",
+        "/images/knaresborough/image2.jpeg",
+        "/images/knaresborough/image3.jpeg",
+        "/images/knaresborough/image4.jpeg"
     ],
     "nearby_universities": nearby,
     "contact_email": "robydot@gmail.com"
