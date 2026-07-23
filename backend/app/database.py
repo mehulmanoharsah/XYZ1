@@ -7,6 +7,13 @@ _client: AsyncIOMotorClient | None = None
 _db: AsyncIOMotorDatabase | None = None
 
 
+async def safe_create_index(collection, *args, **kwargs) -> None:
+    try:
+        await collection.create_index(*args, **kwargs)
+    except Exception as e:
+        print(f"⚠️ Warning: Could not create index on {collection.name}: {e}")
+
+
 async def connect_db() -> None:
     global _client, _db
     _client = AsyncIOMotorClient(
@@ -19,12 +26,10 @@ async def connect_db() -> None:
     await _client.admin.command("ping")
 
     # Ensure indexes on user-managed collections
-    await _db.users.create_index("email", unique=True)
-    await _db.favorites.create_index(
-        [("user_id", 1), ("institution_id", 1)], unique=True
-    )
-    await _db.search_history.create_index("user_id")
-    await _db.search_history.create_index("created_at")
+    await safe_create_index(_db.users, "email", unique=True)
+    await safe_create_index(_db.favorites, [("user_id", 1), ("institution_id", 1)], unique=True)
+    await safe_create_index(_db.search_history, "user_id")
+    await safe_create_index(_db.search_history, "created_at")
 
     # 1. Backfill missing slugs for institutions
     import re
@@ -35,24 +40,24 @@ async def connect_db() -> None:
         await _db.institutions.update_one({"_id": doc["_id"]}, {"$set": {"slug": slug}})
 
     # 2. Ensure indexes on institutions and programs
-    await _db.institutions.create_index("slug", unique=True)
-    await _db.institutions.create_index("country")
-    await _db.institutions.create_index("name")
-    await _db.institutions.create_index("province")
-    await _db.institutions.create_index("city")
-    await _db.institutions.create_index("type")
+    await safe_create_index(_db.institutions, "slug", unique=True)
+    await safe_create_index(_db.institutions, "country")
+    await safe_create_index(_db.institutions, "name")
+    await safe_create_index(_db.institutions, "province")
+    await safe_create_index(_db.institutions, "city")
+    await safe_create_index(_db.institutions, "type")
 
-    await _db.programs.create_index("institution_id")
-    await _db.programs.create_index("institution_name")
-    await _db.programs.create_index("level")
+    await safe_create_index(_db.programs, "institution_id")
+    await safe_create_index(_db.programs, "institution_name")
+    await safe_create_index(_db.programs, "level")
 
     # Ensure indexes on accommodations & inquiries
-    await _db.accommodations.create_index("slug", unique=True)
-    await _db.accommodations.create_index("country")
-    await _db.accommodations.create_index("city")
-    await _db.accommodations.create_index("type")
-    await _db.accommodations.create_index("nearby_universities.institution_id")
-    await _db.housing_inquiries.create_index("user_id")
+    await safe_create_index(_db.accommodations, "slug", unique=True)
+    await safe_create_index(_db.accommodations, "country")
+    await safe_create_index(_db.accommodations, "city")
+    await safe_create_index(_db.accommodations, "type")
+    await safe_create_index(_db.accommodations, "nearby_universities.institution_id")
+    await safe_create_index(_db.housing_inquiries, "user_id")
 
     # Rename 'Knaresborough Residence' to 'Knaresborough' if it exists
     try:
