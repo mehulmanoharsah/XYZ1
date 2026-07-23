@@ -84,15 +84,15 @@ export default function AccommodationPage() {
       {/* ── Top Header ────────────────────────────────────────── */}
       <section style={{ background: 'linear-gradient(135deg, var(--blue-950) 0%, var(--blue-900) 100%)', padding: '60px 0', color: 'var(--white)', marginBottom: '40px', borderRadius: '0 0 var(--radius-xl) var(--radius-xl)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '60%', height: '200%', background: 'radial-gradient(circle, rgba(32,112,200,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="container" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <span className="label" style={{ color: 'var(--blue-300)', marginBottom: '8px', display: 'block' }}>Student Housing Center</span>
           <h1 className="h1" style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', marginBottom: '16px', fontFamily: 'var(--font-display)' }}>Find Your Ideal Student Living</h1>
-          <p className="body-lg" style={{ color: 'var(--gray-300)', maxWidth: '600px', marginBottom: '24px' }}>
+          <p className="body-lg" style={{ color: 'var(--gray-300)', maxWidth: '600px', marginBottom: '24px', marginInline: 'auto' }}>
             Browse secure, verified student hostels, studio apartments, and shared residences close to your university campus.
           </p>
 
           {/* Search bar */}
-          <form onSubmit={handleSearchSubmit} className="card-glass" style={{ display: 'flex', gap: '12px', padding: '8px', maxWidth: '750px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 'var(--radius-md)' }}>
+          <form onSubmit={handleSearchSubmit} className="card-glass" style={{ display: 'flex', gap: '12px', padding: '8px', maxWidth: '750px', width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 'var(--radius-md)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingLeft: '8px' }}>
               <Search size={18} style={{ color: 'var(--blue-300)' }} />
               <input 
