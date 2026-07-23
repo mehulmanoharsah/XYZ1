@@ -105,16 +105,23 @@ async def connect_db() -> None:
             print("SW18 Female Student Homestay accommodation not found. Seeding it...")
             await seed_sw18_homestay(_db)
         else:
-            # Force update images to include all 4 photos if they are missing
-            if len(sw18_exists.get("images", [])) < 4:
+            # Force update images to include the new SW18 photos
+            existing_images = sw18_exists.get("images", [])
+            if not existing_images or "knaresborough" in existing_images[0]:
                 await _db.accommodations.update_one(
                     {"slug": "sw18-female-homestay"},
                     {"$set": {
                         "images": [
-                            "/images/knaresborough/image1.jpeg",
-                            "/images/knaresborough/image2.jpeg",
-                            "/images/knaresborough/image3.jpeg",
-                            "/images/knaresborough/image4.jpeg"
+                            "/images/sw18-female-homestay/2.jpeg",
+                            "/images/sw18-female-homestay/3.jpeg",
+                            "/images/sw18-female-homestay/4.jpeg",
+                            "/images/sw18-female-homestay/6.jpeg",
+                            "/images/sw18-female-homestay/7.jpeg",
+                            "/images/sw18-female-homestay/34.jpeg",
+                            "/images/sw18-female-homestay/21345.jpeg",
+                            "/images/sw18-female-homestay/2345t.jpeg",
+                            "/images/sw18-female-homestay/asd.jpeg",
+                            "/images/sw18-female-homestay/asdf.jpeg"
                         ]
                     }}
                 )
@@ -252,10 +259,16 @@ async def seed_sw18_homestay(db: AsyncIOMotorDatabase) -> None:
         "reviews_count": 0,
         "description": "Clean and quiet SW18 property in London, SW18. Ideal for a female student tenant. Only one room is available at the moment. Room is available now. Contact email: robydot@gmail.com.",
         "images": [
-            "/images/knaresborough/image1.jpeg",
-            "/images/knaresborough/image2.jpeg",
-            "/images/knaresborough/image3.jpeg",
-            "/images/knaresborough/image4.jpeg"
+            "/images/sw18-female-homestay/2.jpeg",
+            "/images/sw18-female-homestay/3.jpeg",
+            "/images/sw18-female-homestay/4.jpeg",
+            "/images/sw18-female-homestay/6.jpeg",
+            "/images/sw18-female-homestay/7.jpeg",
+            "/images/sw18-female-homestay/34.jpeg",
+            "/images/sw18-female-homestay/21345.jpeg",
+            "/images/sw18-female-homestay/2345t.jpeg",
+            "/images/sw18-female-homestay/asd.jpeg",
+            "/images/sw18-female-homestay/asdf.jpeg"
         ],
         "nearby_universities": nearby,
         "contact_email": "robydot@gmail.com"
