@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, Eye, EyeOff, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, UserPlus } from 'lucide-react'
 import { useAuthStore, useFavoritesStore } from '../lib/store'
 import toast from 'react-hot-toast'
 import { useScrollTop } from '../hooks'
@@ -42,8 +42,9 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-left">
         <div className="auth-branding">
-          <div className="auth-logo"><GraduationCap size={28} /></div>
-          <h1 className="h2" style={{ color: 'white', marginTop: 20 }}>Join Wellyura</h1>
+          <div className="auth-logo-wrapper">
+            <img src="/images/WellyuraLogo.png" alt="Wellyura Logo" className="auth-logo-img" />
+          </div>
           <p style={{ color: 'rgba(255,255,255,.7)', marginTop: 12, lineHeight: 1.7 }}>
             Create a free account and start your international education journey today.
           </p>
@@ -117,7 +118,8 @@ export default function RegisterPage() {
         .auth-page { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
         .auth-left { background: linear-gradient(160deg, var(--blue-950), var(--blue-700)); display: flex; align-items: center; justify-content: center; padding: 60px 48px; }
         .auth-branding { max-width: 400px; }
-        .auth-logo { width: 60px; height: 60px; border-radius: var(--radius-lg); background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; color: white; border: 1px solid rgba(255,255,255,.3); }
+        .auth-logo-wrapper { margin-bottom: 24px; }
+        .auth-logo-img { height: 54px; width: auto; display: block; object-fit: contain; filter: invert(1); mix-blend-mode: screen; }
         .auth-features { display: flex; flex-direction: column; gap: 10px; margin-top: 36px; }
         .auth-feature { color: rgba(255,255,255,.8); font-size: .9rem; }
         .auth-right { display: flex; align-items: center; justify-content: center; padding: 60px 48px; background: var(--gray-50); }

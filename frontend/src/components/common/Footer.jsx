@@ -29,8 +29,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <div className="logo-icon-sm"><GraduationCap size={18} /></div>
-              <span className="footer-logo-text">Welly<span>ura</span></span>
+              <img src="/images/WellyuraLogo.png" alt="Wellyura Logo" className="footer-logo-img" />
             </div>
             <p className="footer-tagline">Your trusted guide to international education. Explore top universities and colleges around the world.</p>
             <div className="footer-contact-items">
@@ -117,18 +116,16 @@ export default function Footer() {
         }
         .footer-brand {}
         .footer-logo {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+          display: flex; align-items: center; margin-bottom: 16px;
         }
-        .logo-icon-sm {
-          width: 34px; height: 34px; border-radius: var(--radius-md);
-          background: linear-gradient(135deg, var(--blue-500), var(--blue-400));
-          display: flex; align-items: center; justify-content: center; color: white;
+        .footer-logo-img {
+          height: 34px;
+          width: auto;
+          display: block;
+          object-fit: contain;
+          filter: invert(1);
+          mix-blend-mode: screen;
         }
-        .footer-logo-text {
-          font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
-          color: white;
-        }
-        .footer-logo-text span { color: var(--blue-300); }
         .footer-tagline { font-size: .875rem; line-height: 1.65; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
         .footer-contact-items { display: flex; flex-direction: column; gap: 8px; }
         .footer-contact-item { display: flex; align-items: center; gap: 8px; font-size: .8125rem; color: rgba(255,255,255,0.55); }

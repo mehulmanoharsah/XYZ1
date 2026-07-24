@@ -58,8 +58,7 @@ export default function Navbar() {
       <div className="container nav-inner">
         {/* Logo */}
         <Link to="/" className="nav-logo">
-          <div className="logo-icon"><GraduationCap size={22} /></div>
-          <span className="logo-text">Welly<span>ura</span></span>
+          <img src="/images/WellyuraLogo.png" alt="Wellyura Logo" className="logo-img" />
         </Link>
 
         {/* Desktop links */}
@@ -186,20 +185,15 @@ export default function Navbar() {
           height: 100%; display: flex; align-items: center; gap: 32px;
         }
         .nav-logo {
-          display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+          display: flex; align-items: center; flex-shrink: 0;
           text-decoration: none;
         }
-        .logo-icon {
-          width: 38px; height: 38px; border-radius: var(--radius-md);
-          background: linear-gradient(135deg, var(--blue-600), var(--blue-800));
-          display: flex; align-items: center; justify-content: center;
-          color: white; box-shadow: var(--shadow-blue);
+        .logo-img {
+          height: 38px;
+          width: auto;
+          display: block;
+          object-fit: contain;
         }
-        .logo-text {
-          font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;
-          color: var(--gray-900);
-        }
-        .logo-text span { color: var(--blue-600); }
         .nav-links {
           display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0;
           padding: 4px 0;

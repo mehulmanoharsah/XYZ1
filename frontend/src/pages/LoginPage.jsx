@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, Eye, EyeOff, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { useAuthStore } from '../lib/store'
 import { useFavoritesStore } from '../lib/store'
 import toast from 'react-hot-toast'
@@ -38,10 +38,9 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-left">
         <div className="auth-branding">
-          <div className="auth-logo">
-            <GraduationCap size={28} />
+          <div className="auth-logo-wrapper">
+            <img src="/images/WellyuraLogo.png" alt="Wellyura Logo" className="auth-logo-img" />
           </div>
-          <h1 className="h2" style={{ color: 'white', marginTop: 20 }}>Wellyura</h1>
           <p style={{ color: 'rgba(255,255,255,.7)', marginTop: 12, lineHeight: 1.7 }}>
             Your trusted guide to international university education. Explore, compare, and save.
           </p>
@@ -102,10 +101,16 @@ export default function LoginPage() {
           display: flex; align-items: center; justify-content: center; padding: 60px 48px;
         }
         .auth-branding { max-width: 400px; }
-        .auth-logo {
-          width: 60px; height: 60px; border-radius: var(--radius-lg);
-          background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center;
-          color: white; border: 1px solid rgba(255,255,255,.3);
+        .auth-logo-wrapper {
+          margin-bottom: 24px;
+        }
+        .auth-logo-img {
+          height: 54px;
+          width: auto;
+          display: block;
+          object-fit: contain;
+          filter: invert(1);
+          mix-blend-mode: screen;
         }
         .auth-features { display: flex; flex-direction: column; gap: 10px; margin-top: 36px; }
         .auth-feature { color: rgba(255,255,255,.8); font-size: .9rem; }
