@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: wellyura-api
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGODB_URL
+        value: "mongodb://localhost:27017"
+      - key: DB_NAME
+        value: "canadian_institutions"
+      - key: SECRET_KEY
+        value: "change-me-to-a-long-random-string-in-production"
+      - key: ALGORITHM
+        value: "HS256"
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "10080"
+      - key: CORS_ORIGINS
+        value: "https://your-frontend-domain.com"
