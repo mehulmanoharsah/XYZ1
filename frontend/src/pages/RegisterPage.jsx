@@ -119,7 +119,7 @@ export default function RegisterPage() {
         .auth-left { background: linear-gradient(160deg, var(--blue-950), var(--blue-700)); display: flex; align-items: center; justify-content: center; padding: 60px 48px; }
         .auth-branding { max-width: 400px; }
         .auth-logo-wrapper { margin-bottom: 24px; }
-        .auth-logo-img { height: 54px; width: auto; display: block; object-fit: contain; filter: invert(1); mix-blend-mode: screen; }
+        .auth-logo-img { height: 54px; width: auto; display: block; object-fit: contain; filter: invert(1); }
         .auth-features { display: flex; flex-direction: column; gap: 10px; margin-top: 36px; }
         .auth-feature { color: rgba(255,255,255,.8); font-size: .9rem; }
         .auth-right { display: flex; align-items: center; justify-content: center; padding: 60px 48px; background: var(--gray-50); }

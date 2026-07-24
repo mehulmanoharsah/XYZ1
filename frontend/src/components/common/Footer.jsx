@@ -124,7 +124,6 @@ export default function Footer() {
           display: block;
           object-fit: contain;
           filter: invert(1);
-          mix-blend-mode: screen;
         }
         .footer-tagline { font-size: .875rem; line-height: 1.65; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
         .footer-contact-items { display: flex; flex-direction: column; gap: 8px; }

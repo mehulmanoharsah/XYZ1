@@ -110,7 +110,6 @@ export default function LoginPage() {
           display: block;
           object-fit: contain;
           filter: invert(1);
-          mix-blend-mode: screen;
         }
         .auth-features { display: flex; flex-direction: column; gap: 10px; margin-top: 36px; }
         .auth-feature { color: rgba(255,255,255,.8); font-size: .9rem; }
