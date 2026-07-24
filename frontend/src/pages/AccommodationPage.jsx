@@ -226,7 +226,7 @@ export default function AccommodationPage() {
               <>
                 <div className="grid-cards animate-fadeUp">
                   {accommodations.map((acc) => (
-                    <div key={acc._id} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+                    <Link key={acc._id} to={`/accommodations/${acc.slug}`} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%', textDecoration: 'none', color: 'inherit' }}>
                       
                       {/* Image header */}
                       <div style={{ position: 'relative', height: '200px', overflow: 'hidden', backgroundColor: 'var(--gray-100)' }}>
@@ -265,9 +265,9 @@ export default function AccommodationPage() {
                         </div>
 
                         <h3 className="h3" style={{ fontSize: '1.1rem', marginBottom: '12px', color: 'var(--blue-950)', lineClamp: 2, display: '-webkit-box', WebKitLineClamp: 2, WebKitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          <Link to={`/accommodations/${acc.slug}`} style={{ color: 'inherit' }}>
+                          <span style={{ color: 'inherit' }}>
                             {acc.name}
-                          </Link>
+                          </span>
                         </h3>
 
                         {/* Nearest University Badge */}
@@ -295,14 +295,14 @@ export default function AccommodationPage() {
                             <span className="caption">/mo</span>
                           </div>
 
-                          <Link to={`/accommodations/${acc.slug}`} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Eye size={14} />
                             <span>View details</span>
-                          </Link>
+                          </div>
                         </div>
                       </div>
 
-                    </div>
+                    </Link>
                   ))}
                 </div>
 

@@ -90,7 +90,7 @@ function UniversityAccommodationsTab({ institutionId, countryName }) {
       </div>
       <div className="grid-cards">
         {accommodations.map((acc) => (
-          <div key={acc._id} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+          <Link key={acc._id} to={`/accommodations/${acc.slug}`} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
               <img src={acc.images?.[0] || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80'} alt={acc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
@@ -119,12 +119,12 @@ function UniversityAccommodationsTab({ institutionId, countryName }) {
                   </span>
                   <span className="caption">/mo</span>
                 </div>
-                <Link to={`/accommodations/${acc.slug}`} className="btn btn-secondary btn-sm" style={{ padding: '5px 10px', fontSize: '0.75rem' }}>
+                <div className="btn btn-secondary btn-sm" style={{ padding: '5px 10px', fontSize: '0.75rem' }}>
                   View Room
-                </Link>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
