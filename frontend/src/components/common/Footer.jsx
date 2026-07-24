@@ -1,7 +1,28 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { GraduationCap, Mail, Phone, MapPin, Globe } from 'lucide-react'
+import { GraduationCap, Mail, Phone, MapPin, Globe, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function Footer() {
+  const [showAllCountries, setShowAllCountries] = useState(false)
+
+  const countries = [
+    { name: 'Canada Universities', path: '/country/canada' },
+    { name: 'USA Universities', path: '/country/usa' },
+    { name: 'UK Universities', path: '/country/uk' },
+    { name: 'Australia Universities', path: '/country/australia' },
+    { name: 'Germany Universities', path: '/country/germany' },
+    { name: 'France Universities', path: '/country/france' },
+    { name: 'Netherlands Universities', path: '/country/netherlands' },
+    { name: 'New Zealand Universities', path: '/country/new-zealand' },
+    { name: 'Ireland Universities', path: '/country/ireland' },
+    { name: 'Singapore Universities', path: '/country/singapore' },
+    { name: 'Russia Universities', path: '/country/russia' },
+    { name: 'South Korea Universities', path: '/country/south-korea' },
+  ]
+
+  const initialCountries = countries.slice(0, 5)
+  const otherCountries = countries.slice(5)
+
   return (
     <footer className="footer">
       <div className="container">
@@ -21,19 +42,31 @@ export default function Footer() {
 
           <div className="footer-col">
             <h4 className="footer-heading">Explore</h4>
-            <Link to="/country/canada" className="footer-link">Canada Universities</Link>
-            <Link to="/country/usa" className="footer-link">USA Universities</Link>
-            <Link to="/country/uk" className="footer-link">UK Universities</Link>
-            <Link to="/country/australia" className="footer-link">Australia Universities</Link>
-            <Link to="/country/germany" className="footer-link">Germany Universities</Link>
-            <Link to="/country/france" className="footer-link">France Universities</Link>
-            <Link to="/country/netherlands" className="footer-link">Netherlands Universities</Link>
-            <Link to="/country/new-zealand" className="footer-link">New Zealand Universities</Link>
-            <Link to="/country/ireland" className="footer-link">Ireland Universities</Link>
-            <Link to="/country/singapore" className="footer-link">Singapore Universities</Link>
-            <Link to="/country/russia" className="footer-link">Russia Universities</Link>
-            <Link to="/country/south-korea" className="footer-link">South Korea Universities</Link>
-            <Link to="/search?level=UG" className="footer-link">Undergraduate Programs</Link>
+            {initialCountries.map((c, i) => (
+              <Link key={i} to={c.path} className="footer-link">{c.name}</Link>
+            ))}
+
+            {showAllCountries && (
+              <div className="footer-expanded-links">
+                {otherCountries.map((c, i) => (
+                  <Link key={i} to={c.path} className="footer-link">{c.name}</Link>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowAllCountries(!showAllCountries)}
+              className="footer-link-toggle"
+              aria-expanded={showAllCountries}
+            >
+              {showAllCountries ? (
+                <>Show Less <ChevronUp size={14} /></>
+              ) : (
+                <>Others <ChevronDown size={14} /></>
+              )}
+            </button>
+
+            <Link to="/search?level=UG" className="footer-link" style={{ marginTop: '4px' }}>Undergraduate Programs</Link>
             <Link to="/search?level=PG" className="footer-link">Postgraduate Programs</Link>
             <Link to="/search?scholarship=true" className="footer-link">Scholarships</Link>
             <Link to="/search" className="footer-link">Global Search</Link>
@@ -110,6 +143,44 @@ export default function Footer() {
           text-decoration: none; transition: color var(--transition);
         }
         .footer-link:hover { color: white; }
+        .footer-link-toggle {
+          background: none;
+          border: none;
+          padding: 0;
+          color: var(--blue-400);
+          font-size: .875rem;
+          font-weight: 500;
+          text-align: left;
+          cursor: pointer;
+          transition: color var(--transition);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-top: -2px;
+          margin-bottom: -2px;
+        }
+        .footer-link-toggle:hover {
+          color: var(--blue-300);
+        }
+        .footer-expanded-links {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          animation: slideDown 0.25s ease-out forwards;
+          overflow: hidden;
+        }
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-6px);
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 350px;
+          }
+        }
         .footer-bottom {
           display: flex; align-items: center; justify-content: space-between;
           padding-top: 28px; font-size: .8125rem; color: rgba(255,255,255,0.4);
