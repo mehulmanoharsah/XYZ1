@@ -193,6 +193,7 @@ export default function Navbar() {
           width: auto;
           display: block;
           object-fit: contain;
+          mix-blend-mode: multiply;
         }
         .nav-links {
           display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0;
