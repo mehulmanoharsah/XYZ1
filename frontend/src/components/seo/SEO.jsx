@@ -4,7 +4,7 @@ export default function SEO({
     title,
     description,
     keywords = "",
-    image = "https://www.wellyura.com/images/WellyuraLogo.png",
+    image = "https://www.wellyura.com/images/wellyuralogo_old.png",
     url = "https://www.wellyura.com",
     type = "website",
     schema = null,

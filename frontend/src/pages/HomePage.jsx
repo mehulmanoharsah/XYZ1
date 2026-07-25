@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, MapPin, Star, ArrowRight, Globe, TrendingUp, Shield, Users } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { GraduationCap, Star, ArrowRight, Globe, TrendingUp, Shield } from 'lucide-react'
 import SearchBar from '../components/search/SearchBar'
 import UniversityCard from '../components/university/UniversityCard'
 import { CardSkeleton } from '../components/common/UI'
+import SEO from '../components/seo/SEO'
 import { useScrollTop } from '../hooks'
-import SEO from '../components/seo/SEO.jsx'
 import api from '../lib/api'
 
 const COUNTRIES = [
@@ -31,11 +31,6 @@ const STATS = [
 
 export default function HomePage() {
   useScrollTop()
-  useDocumentMetadata(
-    'Wellyura — International University Directory',
-    'Find your perfect university or college in Canada, USA, UK, Australia, Germany, France, and beyond. Explore programs, tuition, and scholarships.'
-  )
-  const navigate = useNavigate()
   const [featured, setFeatured] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -46,126 +41,168 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="hero">
-        <div className="hero-bg" />
-        <div className="container hero-content">
-          <h1 className="h1 hero-title animate-fadeUp" style={{ animationDelay: '.08s' }}>
-            The Life You’ve<br />
-            <span className="hero-title-accent">Dreamed Of Begins Here</span>
-          </h1>
-          <p className="body-lg hero-sub animate-fadeUp" style={{ animationDelay: '.16s' }}>
-            Explore top universities and colleges across the globe. Compare programs, scholarships, and fees — all in one place.
-          </p>
-          <div className="hero-search animate-fadeUp" style={{ animationDelay: '.24s' }}>
-            <SearchBar large autoNavigate placeholder="Search universities, programs, cities, provinces…" />
-          </div>
-          <div className="hero-tags animate-fadeUp" style={{ animationDelay: '.32s' }}>
-            {['Computer Science', 'MBA', 'Engineering', 'Nursing', 'Business Analytics'].map((t) => (
-              <Link key={t} to={`/search?q=${encodeURIComponent(t)}`} className="hero-tag">{t}</Link>
-            ))}
-          </div>
-        </div>
-      </section>
+    <>
+      <SEO
+        title="Study Abroad | Wellyura"
+        description="Explore 250+ universities across Canada, USA, UK, Australia, Germany, France, Singapore, Ireland, New Zealand and more. Compare tuition fees, scholarships, rankings and admission requirements."
+        keywords="study abroad, universities, colleges, scholarships, tuition fees"
+        url="https://www.wellyura.com"
+        image="/og_preview.png"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Study Abroad | Wellyura",
+          url: "https://www.wellyura.com",
+          description:
+            "Explore universities, scholarships, tuition fees, rankings and admission requirements worldwide.",
+          inLanguage: "en",
+          isPartOf: {
+            "@type": "WebSite",
+            name: "Wellyura",
+            url: "https://www.wellyura.com"
+          }
+        }}
+      />
 
-      {/* ── Stats bar ────────────────────────────────────────── */}
-      <section className="stats-bar">
-        <div className="container">
-          <div className="stats-grid">
-            {STATS.map(({ icon: Icon, label, value }) => (
-              <div key={label} className="stat-item">
-                <div className="stat-icon"><Icon size={20} /></div>
-                <div>
-                  <div className="stat-value">{value}</div>
-                  <div className="stat-label">{label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Country Cards ─────────────────────────────────────── */}
-      <section className="section container">
-        <div className="section-title">
-          <h2 className="h2">Explore by Country</h2>
-        </div>
-        <div className="countries-grid">
-          {COUNTRIES.map((c) => (
-            <Link
-              key={c.name}
-              to={c.disabled ? '#' : c.path}
-              className={`country-card${c.disabled ? ' disabled' : ''}`}
-              onClick={(e) => c.disabled && e.preventDefault()}
+      <div>
+        {/* ── Hero ─────────────────────────────────────────────── */}
+        <section className="hero"
+          aria-labelledby="homepage-title"
+        >
+          <div className="hero-bg" />
+          <div className="container hero-content">
+            <h1
+              id="homepage-title"
+              className="h1 hero-title animate-fadeUp"
+              style={{ animationDelay: '.08s' }}
             >
-              <div className="country-flag">{c.flag}</div>
-              <div className="country-info">
-                <h3 className="country-name">{c.name}</h3>
-                <p className="country-desc">{c.desc}</p>
-                <span className="country-stats">{c.stats}</span>
-              </div>
-              {!c.disabled && <ArrowRight size={18} className="country-arrow" />}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Featured Universities ─────────────────────────────── */}
-      <section className="section section-alt">
-        <div className="container">
-          <div className="flex-between" style={{ marginBottom: 32 }}>
-            <h2 className="h2">Featured Institutions</h2>
-            <Link to="/search" className="btn btn-secondary btn-sm">
-              View All <ArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid-cards">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
-              : featured.map((inst) => <UniversityCard key={inst.id} inst={inst} />)
-            }
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why Wellyura ───────────────────────────────────────── */}
-      <section className="section container">
-        <div className="section-title"><h2 className="h2">Why Choose Wellyura?</h2></div>
-        <div className="grid-3">
-          {[
-            { icon: Shield, title: 'Verified Data', desc: 'All institution data is sourced from official university websites and updated for 2025–26 admissions.' },
-            { icon: Star, title: 'Scholarship Listings', desc: 'Discover available scholarships at every institution, including amounts, criteria, and renewal terms.' },
-            { icon: TrendingUp, title: 'Program Insights', desc: 'Explore hundreds of UG and PG programs with fees, requirements, and career outcomes.' },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="why-card card">
-              <div className="why-icon"><Icon size={22} /></div>
-              <h3 className="h3" style={{ marginBottom: 10 }}>{title}</h3>
-              <p style={{ color: 'var(--gray-500)', fontSize: '.9rem', lineHeight: 1.65 }}>{desc}</p>
+              Find Your Dream University Abroad
+              <br />
+              <span className="hero-title-accent">
+                Study in Canada, USA, UK, Australia & More
+              </span>
+            </h1>
+            <p
+              className="body-lg hero-sub animate-fadeUp"
+              style={{ animationDelay: '.16s' }}
+            >
+              Compare tuition fees, scholarships, university rankings,
+              admission requirements, acceptance rates, and degree programs
+              from 250+ universities across Canada, USA, UK, Australia,
+              Germany, France, Singapore, Ireland, and more.
+            </p>
+            <div className="hero-search animate-fadeUp" style={{ animationDelay: '.24s' }}>
+              <SearchBar
+                large
+                autoNavigate
+                placeholder="Search universities, scholarships, countries or programs..."
+              />
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────── */}
-      <section className="cta-section">
-        <div className="container cta-inner">
-          <h2 className="h2" style={{ color: 'white', marginBottom: 12 }}>Start Your International Journey</h2>
-          <p style={{ color: 'rgba(255,255,255,.75)', marginBottom: 32, fontSize: '1.05rem' }}>
-            Create a free account to save universities, track your applications, and get personalized recommendations.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register" className="btn btn-lg" style={{ background: 'white', color: 'var(--blue-700)' }}>
-              Get Started Free
-            </Link>
-            <Link to="/search" className="btn btn-lg" style={{ background: 'rgba(255,255,255,.15)', color: 'white', border: '1.5px solid rgba(255,255,255,.4)' }}>
-              Browse All Universities <ArrowRight size={16} />
-            </Link>
+            <div className="hero-tags animate-fadeUp" style={{ animationDelay: '.32s' }}>
+              {['Computer Science', 'MBA', 'Engineering', 'Nursing', 'Business Analytics'].map((t) => (
+                <Link key={t} to={`/search?q=${encodeURIComponent(t)}`} className="hero-tag">{t}</Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <style>{`
+        {/* ── Stats bar ────────────────────────────────────────── */}
+        <section className="stats-bar">
+          <div className="container">
+            <div className="stats-grid">
+              {STATS.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="stat-item">
+                  <div className="stat-icon"><Icon size={20} /></div>
+                  <div>
+                    <div className="stat-value">{value}</div>
+                    <div className="stat-label">{label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Country Cards ─────────────────────────────────────── */}
+        <section className="section container">
+          <div className="section-title">
+            <h2 className="h2">Explore by Country</h2>
+          </div>
+          <div className="countries-grid">
+            {COUNTRIES.map((c) => (
+              <Link
+                key={c.name}
+                to={c.disabled ? '#' : c.path}
+                className={`country-card${c.disabled ? ' disabled' : ''}`}
+                onClick={(e) => c.disabled && e.preventDefault()}
+              >
+                <div className="country-flag">{c.flag}</div>
+                <div className="country-info">
+                  <h3 className="country-name">{c.name}</h3>
+                  <p className="country-desc">{c.desc}</p>
+                  <span className="country-stats">{c.stats}</span>
+                </div>
+                {!c.disabled && <ArrowRight size={18} className="country-arrow" />}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Featured Universities ─────────────────────────────── */}
+        <section className="section section-alt">
+          <div className="container">
+            <div className="flex-between" style={{ marginBottom: 32 }}>
+              <h2 className="h2">Featured Institutions</h2>
+              <Link to="/search" className="btn btn-secondary btn-sm">
+                View All <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="grid-cards">
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+                : featured.map((inst) => <UniversityCard key={inst.id} inst={inst} />)
+              }
+            </div>
+          </div>
+        </section>
+
+        {/* ── Why Wellyura ───────────────────────────────────────── */}
+        <section className="section container">
+          <div className="section-title"><h2 className="h2">Why Choose Wellyura?</h2></div>
+          <div className="grid-3">
+            {[
+              { icon: Shield, title: 'Verified Data', desc: 'All institution data is sourced from official university websites and updated for 2025–26 admissions.' },
+              { icon: Star, title: 'Scholarship Listings', desc: 'Discover available scholarships at every institution, including amounts, criteria, and renewal terms.' },
+              { icon: TrendingUp, title: 'Program Insights', desc: 'Explore hundreds of UG and PG programs with fees, requirements, and career outcomes.' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="why-card card">
+                <div className="why-icon"><Icon size={22} /></div>
+                <h3 className="h3" style={{ marginBottom: 10 }}>{title}</h3>
+                <p style={{ color: 'var(--gray-500)', fontSize: '.9rem', lineHeight: 1.65 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── CTA ───────────────────────────────────────────────── */}
+        <section className="cta-section">
+          <div className="container cta-inner">
+            <h2 className="h2" style={{ color: 'white', marginBottom: 12 }}>Start Your International Journey</h2>
+            <p style={{ color: 'rgba(255,255,255,.75)', marginBottom: 32, fontSize: '1.05rem' }}>
+              Create a free account to save universities, track your applications, and get personalized recommendations.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/register" className="btn btn-lg" style={{ background: 'white', color: 'var(--blue-700)' }}>
+                Get Started Free
+              </Link>
+              <Link to="/search" className="btn btn-lg" style={{ background: 'rgba(255,255,255,.15)', color: 'white', border: '1.5px solid rgba(255,255,255,.4)' }}>
+                Browse All Universities <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <style>{`
         /* Hero */
         .hero {
           position: relative; min-height: 580px;
@@ -244,7 +281,9 @@ export default function HomePage() {
         .cta-inner { text-align: center; }
         @media (max-width: 1024px) { .countries-grid { grid-template-columns: repeat(2,1fr); } .stats-grid { gap: 32px; } }
         @media (max-width: 640px) { .countries-grid { grid-template-columns: 1fr; } .stats-grid { flex-direction: column; align-items: center; gap: 24px; } }
-      `}</style>
-    </div>
+     `}</style>
+
+      </div>
+    </>
   )
 }
