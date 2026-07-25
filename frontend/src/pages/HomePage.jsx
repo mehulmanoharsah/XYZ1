@@ -4,7 +4,8 @@ import { GraduationCap, MapPin, Star, ArrowRight, Globe, TrendingUp, Shield, Use
 import SearchBar from '../components/search/SearchBar'
 import UniversityCard from '../components/university/UniversityCard'
 import { CardSkeleton } from '../components/common/UI'
-import { useScrollTop, useDocumentMetadata } from '../hooks'
+import { useScrollTop } from '../hooks'
+import SEO from '../components/seo/SEO.jsx'
 import api from '../lib/api'
 
 const COUNTRIES = [
@@ -24,8 +25,8 @@ const COUNTRIES = [
 
 const STATS = [
   { icon: GraduationCap, label: 'Universities & Colleges', value: '250+' },
-  { icon: Globe,         label: 'Countries Covered',       value: '12+' },
-  { icon: Star,          label: 'Scholarships Listed',      value: '30+' },
+  { icon: Globe, label: 'Countries Covered', value: '12+' },
+  { icon: Star, label: 'Scholarships Listed', value: '30+' },
 ]
 
 export default function HomePage() {
@@ -36,7 +37,7 @@ export default function HomePage() {
   )
   const navigate = useNavigate()
   const [featured, setFeatured] = useState([])
-  const [loading,  setLoading]  = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.get('/institutions', { params: { limit: 6 } })
@@ -134,7 +135,7 @@ export default function HomePage() {
         <div className="grid-3">
           {[
             { icon: Shield, title: 'Verified Data', desc: 'All institution data is sourced from official university websites and updated for 2025–26 admissions.' },
-            { icon: Star,   title: 'Scholarship Listings', desc: 'Discover available scholarships at every institution, including amounts, criteria, and renewal terms.' },
+            { icon: Star, title: 'Scholarship Listings', desc: 'Discover available scholarships at every institution, including amounts, criteria, and renewal terms.' },
             { icon: TrendingUp, title: 'Program Insights', desc: 'Explore hundreds of UG and PG programs with fees, requirements, and career outcomes.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="why-card card">
