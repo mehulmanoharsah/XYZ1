@@ -5,8 +5,9 @@ import {
   Users, Award, Briefcase, Phone, Mail, BookOpen, Star, CheckCircle, Building2
 } from 'lucide-react'
 import { useAuthStore, useFavoritesStore } from '../lib/store'
-import { Breadcrumb, Skeleton, Spinner } from '../components/common/UI'
-import { useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
+import SEO from '../components/seo/SEO'
+import { Breadcrumb, Spinner } from '../components/common/UI'
+import { useScrollTop } from '../hooks'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 
@@ -41,11 +42,11 @@ function ProgramCard({ prog }) {
 }
 
 const TABS = [
-  { id: 'overview',    label: 'Overview',      icon: BookOpen },
-  { id: 'programs',   label: 'Programs',       icon: GraduationCap },
+  { id: 'overview', label: 'Overview', icon: BookOpen },
+  { id: 'programs', label: 'Programs', icon: GraduationCap },
   { id: 'scholarships', label: 'Scholarships', icon: Award },
-  { id: 'contacts',   label: 'Contacts',       icon: Phone },
-  { id: 'campus',     label: 'Campus Life',    icon: Users },
+  { id: 'contacts', label: 'Contacts', icon: Phone },
+  { id: 'campus', label: 'Campus Life', icon: Users },
   { id: 'accommodation', label: 'Accommodations', icon: Building2 },
 ]
 
@@ -104,7 +105,7 @@ function UniversityAccommodationsTab({ institutionId, countryName }) {
               <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <MapPin size={12} /> {acc.address}, {acc.city}
               </p>
-              
+
               {acc.nearby_universities?.filter(u => u.institution_id === institutionId).map((univ, idx) => (
                 <div key={idx} style={{ background: 'var(--blue-50)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--blue-700)', marginBottom: '12px' }}>
                   <strong>{univ.distance_km} km away</strong> ({univ.commute_time_mins} min {univ.commute_mode})
@@ -134,41 +135,42 @@ function UniversityAccommodationsTab({ institutionId, countryName }) {
 export default function UniversityPage() {
   useScrollTop()
   const { slug, countryName } = useParams()
-  const [inst,     setInst]     = useState(null)
-  
-  const pageTitle = inst 
-    ? `${inst.name} — Tuition, Programs & Scholarships | Wellyura` 
+  const [inst, setInst] = useState(null)
+
+  const pageTitle = inst
+    ? `${inst.name} — Tuition, Programs & Scholarships | Wellyura`
     : 'Loading University Details | Wellyura'
-  const pageDesc = inst 
+  const pageDesc = inst
     ? `Explore international programs, tuition fees, admission requirements, scholarships, and campus life at ${inst.name} in ${inst.city || ''}, ${inst.province || ''}, ${inst.country || ''} on Wellyura.`
     : 'Compare global universities, tuition fees, eligibility, and scholarships on Wellyura.'
 
-  useDocumentMetadata(pageTitle, pageDesc)
+  const uniSchema = inst
+    ? {
+      "@context": "https://schema.org",
+      "@type": "CollegeOrUniversity",
+      "name": inst.name,
+      "url": window.location.href,
+      "description": pageDesc,
+      "logo": "https://wellyura.com/wellyura_logo.png",
+      "sameAs": inst.website || "",
 
-  const uniSchema = inst ? {
-    "@context": "https://schema.org",
-    "@type": "CollegeOrUniversity",
-    "name": inst.name,
-    "url": window.location.href,
-    "logo": "https://wellyura.com/wellyura_logo.png",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": inst.city || "",
-      "addressRegion": inst.province || "",
-      "addressCountry": inst.country || ""
-    },
-    "sameAs": inst.website || ""
-  } : null
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": inst.city || "",
+        "addressRegion": inst.province || "",
+        "addressCountry": inst.country || ""
+      }
+    }
+    : null
 
-  useStructuredData(uniSchema)
   const [programs, setPrograms] = useState([])
-  const [loading,  setLoading]  = useState(true)
+  const [loading, setLoading] = useState(true)
   const [progLoad, setProgLoad] = useState(false)
-  const [error,    setError]    = useState(null)
+  const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [progLevel, setProgLevel] = useState('')
 
-  const { user }          = useAuthStore()
+  const { user } = useAuthStore()
   const { toggle, isFav } = useFavoritesStore()
 
   useEffect(() => {
@@ -195,259 +197,302 @@ export default function UniversityPage() {
   }
 
   if (loading) return <div className="page-pad container"><Spinner size={48} /></div>
-  if (error)   return <div className="page-pad container" style={{ textAlign: 'center', paddingTop: 120 }}><h2>{error}</h2><Link to="/" className="btn btn-primary" style={{ marginTop: 24 }}>Go Home</Link></div>
-  if (!inst)   return null
+  if (error) return <div className="page-pad container" style={{ textAlign: 'center', paddingTop: 120 }}><h2>{error}</h2><Link to="/" className="btn btn-primary" style={{ marginTop: 24 }}>Go Home</Link></div>
+  if (!inst) return null
 
   const fav = isFav(inst.id)
   const country = countryName || inst.country?.toLowerCase()
 
   return (
-    <div className="page-pad">
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <div className="uni-detail-hero">
-        <div className="container">
-          <Breadcrumb items={[
-            { label: 'Home', href: '/' },
-            { label: inst.country, href: `/country/${country}` },
-            { label: inst.name },
-          ]} />
-          <div className="uni-detail-top">
-            <div className="uni-detail-avatar">{inst.name?.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>
-            <div className="uni-detail-head">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span className={`badge ${inst.type === 'university' ? 'badge-blue' : 'badge-gold'}`}>
-                  <GraduationCap size={11} />{inst.type}
-                </span>
-                {inst.country && <span className="badge badge-gray"><Globe size={11} />{inst.country}</span>}
+    <>
+      <SEO
+        title={pageTitle}
+        description={pageDesc}
+        keywords={`${inst?.name}, ${inst?.country}, tuition fees, scholarships, admission requirements, programs`}
+        url={`https://www.wellyura.com/country/${country}/university/${slug}`}
+        image="/og_preview.png"
+        schema={uniSchema}
+      />
+
+      <main className="page-pad">
+
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="uni-detail-hero">
+          <div className="container">
+            <Breadcrumb items={[
+              { label: 'Home', href: '/' },
+              { label: inst.country, href: `/country/${country}` },
+              { label: inst.name },
+            ]} />
+            <div className="uni-detail-top">
+              <div className="uni-detail-avatar">{inst.name?.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>
+              <div className="uni-detail-head">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span className={`badge ${inst.type === 'university' ? 'badge-blue' : 'badge-gold'}`}>
+                    <GraduationCap size={11} />{inst.type}
+                  </span>
+                  {inst.country && <span className="badge badge-gray"><Globe size={11} />{inst.country}</span>}
+                </div>
+                <h1 className="h1 uni-detail-title">{inst.name}</h1>
+                <div className="uni-detail-meta">
+                  {inst.city && <span><MapPin size={14} />{inst.city}{inst.province ? `, ${inst.province}` : ''}</span>}
+                  {inst.campuses?.length > 0 && <span><Building2 size={14} />{inst.campuses.length} Campus{inst.campuses.length > 1 ? 'es' : ''}</span>}
+                </div>
               </div>
-              <h1 className="h1 uni-detail-title">{inst.name}</h1>
-              <div className="uni-detail-meta">
-                {inst.city && <span><MapPin size={14} />{inst.city}{inst.province ? `, ${inst.province}` : ''}</span>}
-                {inst.campuses?.length > 0 && <span><Building2 size={14} />{inst.campuses.length} Campus{inst.campuses.length > 1 ? 'es' : ''}</span>}
+              <div className="uni-detail-actions">
+                {inst.website && (
+                  <a href={inst.website} target="_blank" rel="noreferrer" className="btn btn-secondary">
+                    <Globe size={15} /> Visit Website
+                  </a>
+                )}
+                <button onClick={handleFav} className={`btn${fav ? ' btn-danger' : ' btn-secondary'}`}>
+                  <Heart size={15} fill={fav ? 'currentColor' : 'none'} />
+                  {fav ? 'Saved' : 'Save'}
+                </button>
               </div>
-            </div>
-            <div className="uni-detail-actions">
-              {inst.website && (
-                <a href={inst.website} target="_blank" rel="noreferrer" className="btn btn-secondary">
-                  <Globe size={15} /> Visit Website
-                </a>
-              )}
-              <button onClick={handleFav} className={`btn${fav ? ' btn-danger' : ' btn-secondary'}`}>
-                <Heart size={15} fill={fav ? 'currentColor' : 'none'} />
-                {fav ? 'Saved' : 'Save'}
-              </button>
             </div>
           </div>
         </div>
-      </div>
+        {/* ── About University (SEO Content) ───────────────────── */}
+        <section className="container" style={{ padding: "32px 0 8px" }}>
+          <h2
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              color: "var(--blue-950)",
+              marginBottom: "16px",
+            }}
+          >
+            About {inst.name}
+          </h2>
 
-      {/* ── Tabs ───────────────────────────────────────────────── */}
-      <div className="container" style={{ marginTop: 32 }}>
-        <div className="tabs">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button key={id} className={`tab-btn${activeTab === id ? ' active' : ''}`} onClick={() => setActiveTab(id)}>
-              <Icon size={15} /> {label}
-            </button>
-          ))}
-        </div>
+          <p
+            style={{
+              maxWidth: "900px",
+              lineHeight: 1.8,
+              color: "var(--gray-600)",
+              fontSize: "1rem",
+            }}
+          >
+            {inst.name} is a{" "}
+            <strong>{inst.type || "higher education institution"}</strong>
+            {inst.city && <> located in <strong>{inst.city}</strong></>}
+            {inst.province && <> , <strong>{inst.province}</strong></>}
+            {inst.country && <> , <strong>{inst.country}</strong></>}. Explore
+            tuition fees, admission requirements, scholarships, degree
+            programmes, eligibility criteria, campus life, student accommodation,
+            and career opportunities. Wellyura helps international students
+            compare universities and make informed study abroad decisions.
+          </p>
+        </section>
 
-        {/* ── Overview ─── */}
-        {activeTab === 'overview' && (
-          <div className="tab-content animate-fadeIn">
-            <div className="overview-grid">
-              <div>
-                <h3 className="h3" style={{ marginBottom: 16 }}>Quick Facts</h3>
-                <div className="info-table">
-                  <InfoRow icon={Building2}  label="Type"            value={inst.type} />
-                  <InfoRow icon={DollarSign} label="Application Fee" value={inst.application_fee_cad ? `USD ${Math.round(inst.application_fee_cad * 0.73)}` : null} />
-                  <InfoRow icon={MapPin}     label="Campuses"        value={inst.campuses?.join(' · ')} />
-                  <InfoRow icon={Calendar}   label="Intakes"         value={inst.intakes?.join(', ')} />
-                  <InfoRow icon={Globe}      label="Website"         value={inst.website} />
+        {/* ── Tabs ───────────────────────────────────────────────── */}
+        <div className="container" style={{ marginTop: 32 }}>
+          <div className="tabs">
+            {TABS.map(({ id, label, icon: Icon }) => (
+              <button key={id} className={`tab-btn${activeTab === id ? ' active' : ''}`} onClick={() => setActiveTab(id)}>
+                <Icon size={15} /> {label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Overview ─── */}
+          {activeTab === 'overview' && (
+            <div className="tab-content animate-fadeIn">
+              <div className="overview-grid">
+                <div>
+                  <h3 className="h3" style={{ marginBottom: 16 }}>Quick Facts</h3>
+                  <div className="info-table">
+                    <InfoRow icon={Building2} label="Type" value={inst.type} />
+                    <InfoRow icon={DollarSign} label="Application Fee" value={inst.application_fee_cad ? `USD ${Math.round(inst.application_fee_cad * 0.73)}` : null} />
+                    <InfoRow icon={MapPin} label="Campuses" value={inst.campuses?.join(' · ')} />
+                    <InfoRow icon={Calendar} label="Intakes" value={inst.intakes?.join(', ')} />
+                    <InfoRow icon={Globe} label="Website" value={inst.website} />
+                  </div>
+
+                  {/* Deadlines */}
+                  {inst.deadlines && Object.keys(inst.deadlines).length > 0 && (
+                    <div style={{ marginTop: 28 }}>
+                      <h3 className="h3" style={{ marginBottom: 14 }}>Key Deadlines</h3>
+                      <div className="info-table">
+                        {Object.entries(inst.deadlines).map(([k, v]) => (
+                          <InfoRow key={k} icon={Calendar} label={k.replace(/_/g, ' ')} value={String(v)} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Deadlines */}
-                {inst.deadlines && Object.keys(inst.deadlines).length > 0 && (
-                  <div style={{ marginTop: 28 }}>
-                    <h3 className="h3" style={{ marginBottom: 14 }}>Key Deadlines</h3>
-                    <div className="info-table">
-                      {Object.entries(inst.deadlines).map(([k, v]) => (
-                        <InfoRow key={k} icon={Calendar} label={k.replace(/_/g, ' ')} value={String(v)} />
+                <div>
+                  {/* Eligibility */}
+                  {inst.eligibility && (
+                    <div style={{ marginBottom: 28 }}>
+                      <h3 className="h3" style={{ marginBottom: 14 }}>Eligibility</h3>
+                      {inst.eligibility.undergraduate && (
+                        <div className="elig-section">
+                          <div className="elig-title"><GraduationCap size={14} /> Undergraduate</div>
+                          {inst.eligibility.undergraduate.min_class12_percent && (
+                            <p className="elig-row"><CheckCircle size={13} /> Min. Class XII: <strong>{inst.eligibility.undergraduate.min_class12_percent}%</strong></p>
+                          )}
+                          {inst.eligibility.undergraduate.english && Object.entries(inst.eligibility.undergraduate.english).map(([exam, req]) => (
+                            <p key={exam} className="elig-row"><CheckCircle size={13} /> {exam}: <strong>{req}</strong></p>
+                          ))}
+                        </div>
+                      )}
+                      {inst.eligibility.postgraduate && (
+                        <div className="elig-section" style={{ marginTop: 12 }}>
+                          <div className="elig-title"><Award size={14} /> Postgraduate</div>
+                          {inst.eligibility.postgraduate.min_percent && (
+                            <p className="elig-row"><CheckCircle size={13} /> Min. %: <strong>{inst.eligibility.postgraduate.min_percent}%</strong></p>
+                          )}
+                          {inst.eligibility.postgraduate.min_gpa && (
+                            <p className="elig-row"><CheckCircle size={13} /> Min. GPA: <strong>{inst.eligibility.postgraduate.min_gpa}</strong></p>
+                          )}
+                          {inst.eligibility.postgraduate.english && Object.entries(inst.eligibility.postgraduate.english).map(([exam, req]) => (
+                            <p key={exam} className="elig-row"><CheckCircle size={13} /> {exam}: <strong>{req}</strong></p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Top Programs */}
+                  {inst.top_ug_programs?.length > 0 && (
+                    <div style={{ marginBottom: 20 }}>
+                      <h3 className="h3" style={{ marginBottom: 12 }}>Top UG Programs</h3>
+                      {inst.top_ug_programs.map((p, i) => (
+                        <div key={i} className="prog-list-item"><CheckCircle size={13} /> {p}</div>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {/* Eligibility */}
-                {inst.eligibility && (
-                  <div style={{ marginBottom: 28 }}>
-                    <h3 className="h3" style={{ marginBottom: 14 }}>Eligibility</h3>
-                    {inst.eligibility.undergraduate && (
-                      <div className="elig-section">
-                        <div className="elig-title"><GraduationCap size={14} /> Undergraduate</div>
-                        {inst.eligibility.undergraduate.min_class12_percent && (
-                          <p className="elig-row"><CheckCircle size={13} /> Min. Class XII: <strong>{inst.eligibility.undergraduate.min_class12_percent}%</strong></p>
-                        )}
-                        {inst.eligibility.undergraduate.english && Object.entries(inst.eligibility.undergraduate.english).map(([exam, req]) => (
-                          <p key={exam} className="elig-row"><CheckCircle size={13} /> {exam}: <strong>{req}</strong></p>
-                        ))}
-                      </div>
-                    )}
-                    {inst.eligibility.postgraduate && (
-                      <div className="elig-section" style={{ marginTop: 12 }}>
-                        <div className="elig-title"><Award size={14} /> Postgraduate</div>
-                        {inst.eligibility.postgraduate.min_percent && (
-                          <p className="elig-row"><CheckCircle size={13} /> Min. %: <strong>{inst.eligibility.postgraduate.min_percent}%</strong></p>
-                        )}
-                        {inst.eligibility.postgraduate.min_gpa && (
-                          <p className="elig-row"><CheckCircle size={13} /> Min. GPA: <strong>{inst.eligibility.postgraduate.min_gpa}</strong></p>
-                        )}
-                        {inst.eligibility.postgraduate.english && Object.entries(inst.eligibility.postgraduate.english).map(([exam, req]) => (
-                          <p key={exam} className="elig-row"><CheckCircle size={13} /> {exam}: <strong>{req}</strong></p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Top Programs */}
-                {inst.top_ug_programs?.length > 0 && (
-                  <div style={{ marginBottom: 20 }}>
-                    <h3 className="h3" style={{ marginBottom: 12 }}>Top UG Programs</h3>
-                    {inst.top_ug_programs.map((p, i) => (
-                      <div key={i} className="prog-list-item"><CheckCircle size={13} /> {p}</div>
-                    ))}
-                  </div>
-                )}
-                {inst.top_pg_programs?.length > 0 && (
-                  <div>
-                    <h3 className="h3" style={{ marginBottom: 12 }}>Top PG Programs</h3>
-                    {inst.top_pg_programs.map((p, i) => (
-                      <div key={i} className="prog-list-item"><CheckCircle size={13} /> {p}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Programs ─── */}
-        {activeTab === 'programs' && (
-          <div className="animate-fadeIn">
-            <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-              {['', 'UG', 'PG'].map((l) => (
-                <button key={l} className={`filter-chip${progLevel === l ? ' active' : ''}`} onClick={() => setProgLevel(l)}
-                  style={{ padding: '7px 18px', borderRadius: '99px', border: '1.5px solid var(--gray-200)', background: 'white', cursor: 'pointer', fontWeight: 500, fontSize: '.85rem', color: 'var(--gray-600)', transition: 'all .2s' }}>
-                  {l === '' ? 'All' : l === 'UG' ? 'Undergraduate' : 'Postgraduate'}
-                </button>
-              ))}
-            </div>
-            {progLoad ? <Spinner /> : (
-              <div className="grid-cards">
-                {programs.length === 0
-                  ? <p style={{ color: 'var(--gray-500)' }}>No programs found. Try changing the filter.</p>
-                  : programs.map((p, i) => <ProgramCard key={i} prog={p} />)
-                }
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Scholarships ─── */}
-        {activeTab === 'scholarships' && (
-          <div className="animate-fadeIn">
-            {!inst.scholarships?.length
-              ? <p style={{ color: 'var(--gray-500)' }}>No scholarship information available.</p>
-              : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {inst.scholarships.map((s, i) => (
-                    <div key={i} className="scholarship-card">
-                      <div className="scholarship-header">
-                        <Star size={18} className="text-gold" fill="currentColor" />
-                        <h3 className="h3">{s.name}</h3>
-                        {s.amount_cad && <span className="scholarship-amt">USD {Math.round(s.amount_cad * 0.73).toLocaleString()}</span>}
-                      </div>
-                      {s.criteria && <p style={{ fontSize: '.9rem', color: 'var(--gray-600)', marginTop: 6 }}>{s.criteria}</p>}
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                        {s.renewable && <span className="badge badge-green">Renewable</span>}
-                        {s.years && <span className="badge badge-gray">Up to {s.years} years</span>}
-                        {s.per_year && <span className="badge badge-blue">Per Year</span>}
-                      </div>
+                  )}
+                  {inst.top_pg_programs?.length > 0 && (
+                    <div>
+                      <h3 className="h3" style={{ marginBottom: 12 }}>Top PG Programs</h3>
+                      {inst.top_pg_programs.map((p, i) => (
+                        <div key={i} className="prog-list-item"><CheckCircle size={13} /> {p}</div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-          </div>
-        )}
+              </div>
+            </div>
+          )}
 
-        {/* ── Contacts ─── */}
-        {activeTab === 'contacts' && (
-          <div className="animate-fadeIn">
-            {!inst.contacts || Object.keys(inst.contacts).length === 0
-              ? <p style={{ color: 'var(--gray-500)' }}>No contact information available.</p>
-              : (
-                <div className="grid-2">
-                  {Object.entries(inst.contacts).map(([key, val]) => (
-                    typeof val === 'object' && val !== null && (
-                      <div key={key} className="contact-card card" style={{ padding: 24 }}>
-                        <h4 className="h3" style={{ marginBottom: 14, textTransform: 'capitalize' }}>
-                          {key.replace(/_/g, ' ')}
-                        </h4>
-                        {val.email && <div className="contact-row"><Mail size={14} /> <a href={`mailto:${val.email}`}>{val.email}</a></div>}
-                        {val.phone && <div className="contact-row"><Phone size={14} /> {val.phone}</div>}
-                        {val.address && <div className="contact-row"><MapPin size={14} /> {val.address}</div>}
-                        {val.advisor && <div className="contact-row"><Users size={14} /> {val.advisor}</div>}
-                      </div>
-                    )
-                  ))}
-                </div>
-              )}
-          </div>
-        )}
-
-        {/* ── Campus Life ─── */}
-        {activeTab === 'campus' && (
-          <div className="animate-fadeIn">
-            <div className="grid-2">
-              {inst.campus_life && (
-                <div className="card" style={{ padding: 24 }}>
-                  <h3 className="h3" style={{ marginBottom: 16 }}>Campus Life</h3>
-                  {Object.entries(inst.campus_life).map(([k, v]) => (
-                    <InfoRow key={k} icon={Users} label={k.replace(/_/g, ' ')} value={String(v)} />
-                  ))}
-                </div>
-              )}
-              {inst.internships && (
-                <div className="card" style={{ padding: 24 }}>
-                  <h3 className="h3" style={{ marginBottom: 16 }}>Internships & Co-op</h3>
-                  {Object.entries(inst.internships).map(([k, v]) => (
-                    <InfoRow key={k} icon={Briefcase} label={k.replace(/_/g, ' ')} value={String(v)} />
-                  ))}
-                </div>
-              )}
-              {inst.security && (
-                <div className="card" style={{ padding: 24 }}>
-                  <h3 className="h3" style={{ marginBottom: 16 }}>Security</h3>
-                  {Object.entries(inst.security).map(([k, v]) => (
-                    <InfoRow key={k} icon={CheckCircle} label={k.replace(/_/g, ' ')} value={String(v)} />
-                  ))}
+          {/* ── Programs ─── */}
+          {activeTab === 'programs' && (
+            <div className="animate-fadeIn">
+              <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+                {['', 'UG', 'PG'].map((l) => (
+                  <button key={l} className={`filter-chip${progLevel === l ? ' active' : ''}`} onClick={() => setProgLevel(l)}
+                    style={{ padding: '7px 18px', borderRadius: '99px', border: '1.5px solid var(--gray-200)', background: 'white', cursor: 'pointer', fontWeight: 500, fontSize: '.85rem', color: 'var(--gray-600)', transition: 'all .2s' }}>
+                    {l === '' ? 'All' : l === 'UG' ? 'Undergraduate' : 'Postgraduate'}
+                  </button>
+                ))}
+              </div>
+              {progLoad ? <Spinner /> : (
+                <div className="grid-cards">
+                  {programs.length === 0
+                    ? <p style={{ color: 'var(--gray-500)' }}>No programs found. Try changing the filter.</p>
+                    : programs.map((p, i) => <ProgramCard key={i} prog={p} />)
+                  }
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── Accommodations ─── */}
-        {activeTab === 'accommodation' && (
-          <div className="tab-content animate-fadeIn">
-            <UniversityAccommodationsTab institutionId={inst.id} countryName={inst.country} />
-          </div>
-        )}
-      </div>
+          {/* ── Scholarships ─── */}
+          {activeTab === 'scholarships' && (
+            <div className="animate-fadeIn">
+              {!inst.scholarships?.length
+                ? <p style={{ color: 'var(--gray-500)' }}>No scholarship information available.</p>
+                : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {inst.scholarships.map((s, i) => (
+                      <div key={i} className="scholarship-card">
+                        <div className="scholarship-header">
+                          <Star size={18} className="text-gold" fill="currentColor" />
+                          <h3 className="h3">{s.name}</h3>
+                          {s.amount_cad && <span className="scholarship-amt">USD {Math.round(s.amount_cad * 0.73).toLocaleString()}</span>}
+                        </div>
+                        {s.criteria && <p style={{ fontSize: '.9rem', color: 'var(--gray-600)', marginTop: 6 }}>{s.criteria}</p>}
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                          {s.renewable && <span className="badge badge-green">Renewable</span>}
+                          {s.years && <span className="badge badge-gray">Up to {s.years} years</span>}
+                          {s.per_year && <span className="badge badge-blue">Per Year</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
 
-      <style>{`
+          {/* ── Contacts ─── */}
+          {activeTab === 'contacts' && (
+            <div className="animate-fadeIn">
+              {!inst.contacts || Object.keys(inst.contacts).length === 0
+                ? <p style={{ color: 'var(--gray-500)' }}>No contact information available.</p>
+                : (
+                  <div className="grid-2">
+                    {Object.entries(inst.contacts).map(([key, val]) => (
+                      typeof val === 'object' && val !== null && (
+                        <div key={key} className="contact-card card" style={{ padding: 24 }}>
+                          <h4 className="h3" style={{ marginBottom: 14, textTransform: 'capitalize' }}>
+                            {key.replace(/_/g, ' ')}
+                          </h4>
+                          {val.email && <div className="contact-row"><Mail size={14} /> <a href={`mailto:${val.email}`}>{val.email}</a></div>}
+                          {val.phone && <div className="contact-row"><Phone size={14} /> {val.phone}</div>}
+                          {val.address && <div className="contact-row"><MapPin size={14} /> {val.address}</div>}
+                          {val.advisor && <div className="contact-row"><Users size={14} /> {val.advisor}</div>}
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* ── Campus Life ─── */}
+          {activeTab === 'campus' && (
+            <div className="animate-fadeIn">
+              <div className="grid-2">
+                {inst.campus_life && (
+                  <div className="card" style={{ padding: 24 }}>
+                    <h3 className="h3" style={{ marginBottom: 16 }}>Campus Life</h3>
+                    {Object.entries(inst.campus_life).map(([k, v]) => (
+                      <InfoRow key={k} icon={Users} label={k.replace(/_/g, ' ')} value={String(v)} />
+                    ))}
+                  </div>
+                )}
+                {inst.internships && (
+                  <div className="card" style={{ padding: 24 }}>
+                    <h3 className="h3" style={{ marginBottom: 16 }}>Internships & Co-op</h3>
+                    {Object.entries(inst.internships).map(([k, v]) => (
+                      <InfoRow key={k} icon={Briefcase} label={k.replace(/_/g, ' ')} value={String(v)} />
+                    ))}
+                  </div>
+                )}
+                {inst.security && (
+                  <div className="card" style={{ padding: 24 }}>
+                    <h3 className="h3" style={{ marginBottom: 16 }}>Security</h3>
+                    {Object.entries(inst.security).map(([k, v]) => (
+                      <InfoRow key={k} icon={CheckCircle} label={k.replace(/_/g, ' ')} value={String(v)} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Accommodations ─── */}
+          {activeTab === 'accommodation' && (
+            <div className="tab-content animate-fadeIn">
+              <UniversityAccommodationsTab institutionId={inst.id} countryName={inst.country} />
+            </div>
+          )}
+        </div>
+
+        <style>{`
         .uni-detail-hero {
           background: linear-gradient(135deg, var(--blue-950), var(--blue-800));
           padding: calc(var(--nav-h) + 32px) 0 48px;
@@ -516,6 +561,7 @@ export default function UniversityPage() {
         .filter-chip:hover { border-color: var(--blue-300) !important; color: var(--blue-600) !important; background: var(--blue-50) !important; }
         @media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; } }
       `}</style>
-    </div>
+      </main>
+    </>
   )
 }
