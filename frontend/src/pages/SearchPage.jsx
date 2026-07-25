@@ -86,14 +86,14 @@ export default function SearchPage() {
   useEffect(() => {
     const params = new URLSearchParams()
 
-    if (filters.q) params.q = filters.q
-    if (filters.country) params.country = filters.country
-    if (filters.province) params.province = filters.province
-    if (filters.city) params.city = filters.city
-    if (filters.type) params.type = filters.type
-    if (filters.level) params.level = filters.level
-    if (filters.scholarship) params.scholarship = 'true'
-    if (filters.page > 1) params.page = filters.page
+    if (filters.q) params.set('q', filters.q)
+    if (filters.country) params.set('country', filters.country)
+    if (filters.province) params.set('province', filters.province)
+    if (filters.city) params.set('city', filters.city)
+    if (filters.type) params.set('type', filters.type)
+    if (filters.level) params.set('level', filters.level)
+    if (filters.scholarship) params.set('scholarship', 'true')
+    if (filters.page > 1) params.set('page', filters.page.toString())
 
     setSearchParams(params)
   }, [filters, setSearchParams])
