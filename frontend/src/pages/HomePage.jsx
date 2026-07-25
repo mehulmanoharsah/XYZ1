@@ -35,9 +35,18 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/institutions', { params: { limit: 6 } })
-      .then((r) => setFeatured(r.data.data || []))
-      .finally(() => setLoading(false))
+    api
+      .get('/institutions', { params: { limit: 6 } })
+      .then((r) => {
+        console.log("FULL RESPONSE:", r.data)
+        setFeatured(r.data.data || [])
+      })
+      .catch((err) => {
+        console.error("API ERROR:", err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   return (
