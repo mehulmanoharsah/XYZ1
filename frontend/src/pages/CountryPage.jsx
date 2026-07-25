@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
+import SEO from '../components/seo/SEO'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { MapPin, Building2 } from 'lucide-react'
 import UniversityCard from '../components/university/UniversityCard'
 import FilterSidebar from '../components/search/FilterSidebar'
 import SearchBar from '../components/search/SearchBar'
 import { CardSkeleton, Pagination, EmptyState, Breadcrumb } from '../components/common/UI'
-import { useDebounce, useScrollTop, useDocumentMetadata, useStructuredData } from '../hooks'
+import { useDebounce, useScrollTop } from '../hooks'
 import api from '../lib/api'
 
 const COUNTRY_BANNERS = {
@@ -108,17 +109,17 @@ export default function CountryPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [institutions, setInstitutions] = useState([])
-  const [total,        setTotal]        = useState(0)
-  const [totalPages,   setTotalPages]   = useState(1)
-  const [provinces,    setProvinces]    = useState([])
-  const [cities,       setCities]       = useState([])
-  const [loading,      setLoading]      = useState(true)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [provinces, setProvinces] = useState([])
+  const [cities, setCities] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const [filters, setFilters] = useState({
-    q:          searchParams.get('q') || '',
-    province:   searchParams.get('province') || '',
-    city:       searchParams.get('city') || '',
-    type:       searchParams.get('type') || '',
+    q: searchParams.get('q') || '',
+    province: searchParams.get('province') || '',
+    city: searchParams.get('city') || '',
+    type: searchParams.get('type') || '',
     scholarship: undefined,
     page: 1,
   })
@@ -135,15 +136,20 @@ export default function CountryPage() {
 
   const pageTitle = banner.label ? `Study in ${banner.label} — Top Universities & Colleges | Wellyura` : 'Study Abroad | Wellyura'
   const pageDesc = banner.desc || `Compare tuition fees, scholarships, eligibility requirements, and student life at top universities in ${banner.label} on Wellyura.`
-  
-  useDocumentMetadata(pageTitle, pageDesc)
 
   const countrySchema = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": `Top Universities and Colleges in ${banner.label}`,
-    "description": banner.desc,
+    "@type": "CollectionPage",
+    "name": `Study in ${banner.label} – Top Universities & Colleges`,
+    "description": pageDesc,
     "url": window.location.href,
+    "inLanguage": "en",
+
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": total
+    },
+
     "itemListElement": institutions.slice(0, 10).map((inst, index) => ({
       "@type": "ListItem",
       "position": index + 1,
@@ -151,7 +157,6 @@ export default function CountryPage() {
       "name": inst.name
     }))
   }
-  useStructuredData(countrySchema)
 
   useEffect(() => {
     let cancelled = false
@@ -181,96 +186,136 @@ export default function CountryPage() {
   const resetFilters = () => setFilters({ q: '', province: '', city: '', type: '', scholarship: undefined, page: 1 })
 
   return (
-    <div className="page-pad">
-      {/* ── Banner ─────────────────────────────────────────────── */}
-      <div className="country-hero" style={{ background: banner.bg }}>
-        <div className="container">
-          <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: banner.label }]} />
-          <div className="country-hero-content">
-            <span className="country-hero-flag">{banner.flag}</span>
-            <div>
-              <h1 className="h1" style={{ color: 'white', marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>Study in {banner.label}</h1>
-              <p style={{ color: 'rgba(255,255,255,.9)', fontSize: '1.05rem', marginBottom: 24, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.tagline}</p>
-              <p style={{ color: 'rgba(255,255,255,.75)', maxWidth: 640, fontSize: '.9rem', lineHeight: 1.7, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.desc}</p>
+    <>
+      <SEO
+        title={pageTitle}
+        description={pageDesc}
+        keywords={`Study in ${banner.label}, Universities in ${banner.label}, Scholarships ${banner.label}, Colleges ${banner.label}`}
+        url={`https://www.wellyura.com/country/${countryName}`}
+        image="/og_preview.png"
+        schema={countrySchema}
+      />
+      <main className="page-pad">
+        {/* ── Banner ─────────────────────────────────────────────── */}
+        <div className="country-hero" style={{ background: banner.bg }}>
+          <div className="container">
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: banner.label }]} />
+            <div className="country-hero-content">
+              <span className="country-hero-flag">{banner.flag}</span>
+              <div>
+                <h1 className="h1" style={{ color: 'white', marginBottom: 8, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>Study in {banner.label}</h1>
+                <p style={{ color: 'rgba(255,255,255,.9)', fontSize: '1.05rem', marginBottom: 24, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.tagline}</p>
+                <p style={{ color: 'rgba(255,255,255,.75)', maxWidth: 640, fontSize: '.9rem', lineHeight: 1.7, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{banner.desc}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Main content ──────────────────────────────────────── */}
-      <div className="container" style={{ marginTop: 40 }}>
-        {/* Search bar */}
-        <div style={{ marginBottom: 32 }}>
-          <SearchBar
-            value={filters.q}
-            onChange={(q) => setFilters((f) => ({ ...f, q, page: 1 }))}
-            placeholder={`Search ${banner.label} universities, programs…`}
-          />
-        </div>
-
-        <div className="country-layout">
-          {/* Sidebar */}
-          <div className="sidebar-col">
-            <FilterSidebar
-              filters={filters}
-              onChange={setFilters}
-              onReset={resetFilters}
-              provinces={provinces}
-              cities={cities}
+        {/* ── Main content ──────────────────────────────────────── */}
+        <div className="container" style={{ marginTop: 40 }}>
+          {/* Search bar */}
+          <div style={{ marginBottom: 32 }}>
+            <SearchBar
+              value={filters.q}
+              onChange={(q) => setFilters((f) => ({ ...f, q, page: 1 }))}
+              placeholder={`Search universities, scholarships or programs in ${banner.label}`}
             />
           </div>
 
-          {/* Grid */}
-          <div className="results-col">
-            <div className="results-header">
-              <span className="results-count">
-                <Building2 size={16} />
-                {loading ? '…' : `${total} institution${total !== 1 ? 's' : ''} found`}
-              </span>
+          <div className="country-layout">
+            {/* Sidebar */}
+            <div className="sidebar-col">
+              <FilterSidebar
+                filters={filters}
+                onChange={setFilters}
+                onReset={resetFilters}
+                provinces={provinces}
+                cities={cities}
+              />
             </div>
 
-            {loading ? (
-              <div className="grid-cards">
-                {Array.from({ length: 9 }).map((_, i) => <CardSkeleton key={i} />)}
+            {/* Grid */}
+            <div className="results-col">
+              <div className="results-header">
+                <span className="results-count">
+                  <Building2 size={16} />
+                  {loading ? '…' : `${total} institution${total !== 1 ? 's' : ''} found`}
+                </span>
               </div>
-            ) : institutions.length === 0 ? (
-              <EmptyState
-                icon={Building2}
-                title="No institutions found"
-                message="Try adjusting your filters or search terms."
-                action={<button className="btn btn-secondary" onClick={resetFilters}>Clear filters</button>}
-              />
-            ) : (
-              <>
+
+              {loading ? (
                 <div className="grid-cards">
-                  {institutions.map((inst) => <UniversityCard key={inst.id} inst={inst} />)}
+                  {Array.from({ length: 9 }).map((_, i) => <CardSkeleton key={i} />)}
                 </div>
-                <Pagination page={filters.page} totalPages={totalPages} onChange={(p) => setFilters((f) => ({ ...f, page: p }))} />
-              </>
-            )}
+              ) : institutions.length === 0 ? (
+                <EmptyState
+                  icon={Building2}
+                  title="No institutions found"
+                  message="Try adjusting your filters or search terms."
+                  action={<button className="btn btn-secondary" onClick={resetFilters}>Clear filters</button>}
+                />
+              ) : (
+                <>
+                  <div className="grid-cards">
+                    {institutions.map((inst) => <UniversityCard key={inst.id} inst={inst} />)}
+                  </div>
+                  <Pagination page={filters.page} totalPages={totalPages} onChange={(p) => setFilters((f) => ({ ...f, page: p }))} />
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <style>{`
-        .country-hero {
-          padding: calc(var(--nav-h) + 40px) 0 52px;
-          margin-top: calc(-1 * (var(--nav-h) + 32px));
-          margin-bottom: 0;
-        }
-        .country-hero nav, .country-hero nav a, .country-hero nav span {
-          color: rgba(255, 255, 255, 0.85) !important;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-        .country-hero-content { display: flex; align-items: flex-start; gap: 24px; }
-        .country-hero-flag { font-size: 4rem; flex-shrink: 0; }
-        .country-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; }
-        .sidebar-col {}
-        .results-col {}
-        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .results-count { display: flex; align-items: center; gap: 8px; font-size: .875rem; color: var(--gray-600); font-weight: 500; }
-        @media (max-width: 900px) { .country-layout { grid-template-columns: 1fr; } .sidebar-col { display: none; } }
-      `}</style>
-    </div>
+        <style>{`
+          .country-hero {
+            padding: calc(var(--nav-h) + 40px) 0 52px;
+            margin-top: calc(-1 * (var(--nav-h) + 32px));
+            margin-bottom: 0;
+          }
+          .country-hero nav,
+          .country-hero nav a,
+          .country-hero nav span {
+            color: rgba(255, 255, 255, 0.85) !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+          }
+          .country-hero-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+          }
+          .country-hero-flag {
+            font-size: 4rem;
+            flex-shrink: 0;
+          }
+          .country-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 28px;
+          }
+          .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          }
+          .results-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .875rem;
+            color: var(--gray-600);
+            font-weight: 500;
+          }
+          @media (max-width: 900px) {
+            .country-layout {
+              grid-template-columns: 1fr;
+            }
+            .sidebar-col {
+              display: none;
+            }
+          }
+        `}</style>
+      </main>
+    </>
   )
 }
