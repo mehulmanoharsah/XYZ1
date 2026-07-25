@@ -37,16 +37,9 @@ export default function HomePage() {
   useEffect(() => {
     api
       .get('/institutions', { params: { limit: 6 } })
-      .then((r) => {
-        console.log("FULL RESPONSE:", r.data)
-        setFeatured(r.data.data || [])
-      })
-      .catch((err) => {
-        console.error("API ERROR:", err)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      .then((r) => setFeatured(r.data.data || []))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   return (
