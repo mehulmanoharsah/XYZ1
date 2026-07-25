@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search } from 'lucide-react'
 import UniversityCard from '../components/university/UniversityCard'
 import SearchBar from '../components/search/SearchBar'
 import FilterSidebar from '../components/search/FilterSidebar'
@@ -84,7 +84,7 @@ export default function SearchPage() {
     }).finally(() => setLoading(false))
   }, [filtersKey])
   useEffect(() => {
-    const params = {}
+    const params = new URLSearchParams()
 
     if (filters.q) params.q = filters.q
     if (filters.country) params.country = filters.country
