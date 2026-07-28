@@ -134,29 +134,91 @@ export default function CountryPage() {
     bg: 'linear-gradient(135deg, var(--blue-900), var(--blue-700))',
   }
 
-  const pageTitle = banner.label ? `Study in ${banner.label} — Top Universities & Colleges | Wellyura` : 'Study Abroad | Wellyura'
-  const pageDesc = banner.desc || `Compare tuition fees, scholarships, eligibility requirements, and student life at top universities in ${banner.label} on Wellyura.`
+  const pageTitle = (() => {
+    if (filters.city)
+      return `Universities in ${filters.city}, ${banner.label} | Wellyura`
+
+    if (filters.province)
+      return `Universities in ${filters.province}, ${banner.label} | Wellyura`
+
+    if (filters.q)
+      return `${filters.q} Universities in ${banner.label} | Wellyura`
+
+    return `Study in ${banner.label} | Universities, Tuition Fees & Scholarships | Wellyura`
+  })()
+
+  const pageDesc = (() => {
+    if (filters.city)
+      return `Explore universities in ${filters.city}, ${banner.label}. Compare tuition fees, scholarships, admission requirements and degree programmes.`
+
+    if (filters.province)
+      return `Compare universities in ${filters.province}, ${banner.label}. Find tuition fees, scholarships and admission requirements.`
+
+    if (filters.q)
+      return `Browse ${filters.q} universities in ${banner.label}. Compare rankings, tuition fees, scholarships and admissions.`
+
+    return `Study in ${banner.label}. Compare universities, tuition fees, scholarships, admission requirements, rankings and degree programmes for international students.`
+  })()
+
+  const canonicalUrl =
+  `${window.location.origin}/country/${countryName}`
 
   const countrySchema = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": `Study in ${banner.label} – Top Universities & Colleges`,
-    "description": pageDesc,
-    "url": window.location.href,
-    "inLanguage": "en",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "name": pageTitle,
+        "description": pageDesc,
+        "url": canonicalUrl,
+        "mainEntity": {
+          "@id": "#itemlist"
+        }
+      },
+      {
+        "@type": "ItemList",
+        "@id": "#itemlist",
+        "numberOfItems": total,
+        "itemListElement": institutions.map((inst, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": inst.name,
+          "url": `${window.location.origin}/country/${countryName}/university/${inst.slug}`
+        }))
+      },
 
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": total
-    },
-
-    "itemListElement": institutions.slice(0, 10).map((inst, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "url": `${window.location.origin}/country/${countryName}/university/${inst.slug}`,
-      "name": inst.name
-    }))
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.wellyura.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": banner.label,
+            "item": canonicalUrl
+          }
+        ]
+      }
+    ]
   }
+
+  const pageKeywords = [
+    `Study in ${banner.label}`,
+    `Universities in ${banner.label}`,
+    `Colleges in ${banner.label}`,
+    `Scholarships in ${banner.label}`,
+    `${banner.label} tuition fees`,
+    `${banner.label} admissions`,
+    `${banner.label} student visa`,
+    `${banner.label} universities`,
+    "international students",
+    "study abroad"
+  ].join(", ")
 
   useEffect(() => {
     let cancelled = false
@@ -190,9 +252,9 @@ export default function CountryPage() {
       <SEO
         title={pageTitle}
         description={pageDesc}
-        keywords={`Study in ${banner.label}, Universities in ${banner.label}, Scholarships ${banner.label}, Colleges ${banner.label}`}
-        url={`https://www.wellyura.com/country/${countryName}`}
-        image="/og_preview.png"
+        keywords={pageKeywords}
+        url={canonicalUrl}
+        image="https://www.wellyura.com/og_preview.png"
         schema={countrySchema}
       />
       <main className="page-pad">
@@ -239,32 +301,87 @@ export default function CountryPage() {
               <div className="results-header">
                 <span className="results-count">
                   <Building2 size={16} />
-                  {loading ? '…' : `${total} institution${total !== 1 ? 's' : ''} found`}
+                  {loading ? "…" : `${total} institution${total !== 1 ? "s" : ""} found`}
                 </span>
               </div>
 
               {loading ? (
                 <div className="grid-cards">
-                  {Array.from({ length: 9 }).map((_, i) => <CardSkeleton key={i} />)}
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <CardSkeleton key={i} />
+                  ))}
                 </div>
               ) : institutions.length === 0 ? (
                 <EmptyState
                   icon={Building2}
                   title="No institutions found"
                   message="Try adjusting your filters or search terms."
-                  action={<button className="btn btn-secondary" onClick={resetFilters}>Clear filters</button>}
+                  action={
+                    <button className="btn btn-secondary" onClick={resetFilters}>
+                      Clear filters
+                    </button>
+                  }
                 />
               ) : (
                 <>
                   <div className="grid-cards">
-                    {institutions.map((inst) => <UniversityCard key={inst.id} inst={inst} />)}
+                    {institutions.map((inst) => (
+                      <UniversityCard key={inst.id} inst={inst} />
+                    ))}
                   </div>
-                  <Pagination page={filters.page} totalPages={totalPages} onChange={(p) => setFilters((f) => ({ ...f, page: p }))} />
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+
+                  <Pagination
+                    page={filters.page}
+                    totalPages={totalPages}
+                    onChange={(p) => setFilters((f) => ({ ...f, page: p }))}
+                  />
+
+                  <section
+                    style={{
+                    marginTop: "64px",
+                    maxWidth: "950px",
+                  lineHeight: 1.8,
+                }}
+              >
+                <h2>Why Study in {banner.label}?</h2>
+
+                <p>
+                  Studying in {banner.label} offers international students access to
+                  world-class universities, globally recognised degrees, research
+                  opportunities, scholarships and excellent career prospects. Compare
+                  tuition fees, admission requirements, campus life and degree
+                  programmes to find the university that best matches your goals.
+                </p>
+
+                <h3>Top Universities</h3>
+
+                <p>
+                  Browse leading universities across {banner.label}, compare rankings,
+                  tuition fees, scholarships and programmes in engineering, business,
+                  medicine, computer science and many other disciplines.
+                </p>
+
+                <h3>Scholarships & Tuition Fees</h3>
+
+                <p>
+                  Discover funding opportunities, tuition costs and financial aid
+                  available for international students studying in {banner.label}.
+                </p>
+
+                <h3>Student Visa & Careers</h3>
+
+                <p>
+                  Learn about the student visa application process, post-study work
+                  opportunities and graduate career pathways available for international
+                  students in {banner.label}.
+                </p>
+              </section>
+            </>
+          )}
+        </div> {/* results-col */}
+        </div> {/* country-layout */}
+        </div> {/* container */}
+
 
         <style>{`
           .country-hero {
@@ -317,5 +434,5 @@ export default function CountryPage() {
         `}</style>
       </main>
     </>
-  )
+   )
 }

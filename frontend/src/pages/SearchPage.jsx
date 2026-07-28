@@ -33,28 +33,146 @@ export default function SearchPage() {
   })
 
   const debouncedQ = useDebounce(filters.q, 400)
-  const pageTitle = filters.q
-    ? `Search "${filters.q}" Universities | Wellyura`
-    : filters.country
-      ? `Study in ${filters.country} | University Search | Wellyura`
-      : 'Search Global Universities & Colleges | Wellyura'
+  const pageTitle = (() => {
+      if (filters.city && filters.country)
+        return `Universities in ${filters.city}, ${filters.country} | Wellyura`
 
-  const pageDescription = filters.q
-    ? `Browse universities matching "${filters.q}". Compare tuition fees, scholarships, admission requirements, and degree programs on Wellyura.`
-    : filters.country
-      ? `Search universities in ${filters.country}. Compare tuition fees, scholarships, admission requirements, and degree programs on Wellyura.`
-      : 'Search and compare universities, tuition fees, scholarships, admission requirements, and degree programs across top study abroad destinations.'
+      if (filters.city)
+        return `Universities in ${filters.city} | Wellyura`
 
+      if (filters.country && filters.level)
+        return `${filters.level === "UG" ? "Undergraduate" : "Postgraduate"} Universities in ${filters.country} | Wellyura`
+
+      if (filters.country && filters.scholarship)
+        return `Scholarship Universities in ${filters.country} | Wellyura`
+
+      if (filters.country)
+        return `Universities in ${filters.country} | Wellyura`
+
+      if (filters.q)
+        return `${filters.q} Universities | Wellyura`
+
+      return "Search Global Universities & Colleges | Wellyura"
+  })()
+
+  const pageDescription = (() => {
+      if (filters.city && filters.country)
+        return `Explore universities in ${filters.city}, ${filters.country}. Compare tuition fees, rankings, scholarships, admission requirements and degree programmes.`
+
+      if (filters.country)
+        return `Compare universities in ${filters.country}. Discover tuition fees, scholarships, rankings, admission requirements and degree programmes for international students.`
+
+      if (filters.q)
+        return `Search universities matching "${filters.q}". Compare tuition fees, scholarships, rankings and admission requirements on Wellyura.`
+
+      return "Search and compare universities, tuition fees, scholarships, admission requirements and degree programmes across the world's leading study destinations."
+  })()
+
+  const pageHeading = (() => {
+      if (filters.city && filters.country)
+        return `Universities in ${filters.city}, ${filters.country}`
+
+      if (filters.country)
+        return `Universities in ${filters.country}`
+
+      if (filters.q)
+        return `Search Results for "${filters.q}"`
+
+      return "Global University Search"
+  })()
+
+  const introText = (() => {
+      if (filters.city && filters.country)
+        return `Explore universities in ${filters.city}, ${filters.country}. Compare tuition fees, scholarships, rankings, admission requirements, campus locations and degree programmes.`
+
+      if (filters.country)
+        return `Compare universities in ${filters.country}. Find undergraduate and postgraduate programmes, tuition fees, scholarships and admission requirements.`
+
+      if (filters.q)
+        return `Browse universities related to "${filters.q}" and compare tuition fees, rankings, scholarships and admission requirements.`
+
+      return `Search universities worldwide based on tuition fees, scholarships, rankings, admission requirements, degree programmes and campus locations.`
+  })()
+
+  const pageKeywords = [
+    filters.country,
+    filters.city,
+    filters.q,
+    "study abroad",
+    "universities",
+    "college",
+    "scholarships",
+    "tuition fees",
+    "international students",
+    "degree programmes",
+    "admission requirements"
+  ]
+  .filter(Boolean)
+  .join(", ")
+  
+  const canonicalUrl = `${window.location.origin}/search?${searchParams.toString()}`
   const searchSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": pageTitle,
-    "description": pageDescription,
-    "url": window.location.href,
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": total
+    "@context":"https://schema.org",
+    "@graph":[
+      {
+        "@type":"CollectionPage",
+
+        "name":pageTitle,
+
+        "description":pageDescription,
+
+        "url":canonicalUrl,
+
+        "mainEntity":{
+          "@id":"#itemlist"
+        } 
+      },
+
+      {
+        "@type":"ItemList",
+
+        "@id":"#itemlist",
+
+        "numberOfItems":total,
+
+        "itemListElement":
+          results.map((u,index)=>({
+
+            "@type":"ListItem",
+
+            "position":index+1,
+
+            "name":u.name,
+
+            "url":`https://www.wellyura.com/country/${u.country.toLowerCase()}/university/${u.slug}`
+
+          }))
+      },
+
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.wellyura.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Search",
+          "item": "https://www.wellyura.com/search"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": pageHeading,
+          "item": canonicalUrl
+        }
+      ]
     }
+    ]
   }
 
   const filtersKey = JSON.stringify({ ...filters, q: debouncedQ })
@@ -99,15 +217,15 @@ export default function SearchPage() {
   }, [filters, setSearchParams])
 
   const resetFilters = () => setFilters({ q: '', country: '', province: '', city: '', type: '', level: '', scholarship: undefined, page: 1 })
-
+  
   return (
     <>
       <SEO
         title={pageTitle}
         description={pageDescription}
-        keywords="study abroad, university search, scholarships, tuition fees, international universities"
-        url={window.location.href}
-        image="/og_preview.png"
+        keywords={pageKeywords}
+        url={canonicalUrl}
+        image="https://www.wellyura.com/og_preview.png"
         schema={searchSchema}
       />
 
@@ -116,9 +234,12 @@ export default function SearchPage() {
         {/* ── Page header ─── */}
         <div className="search-page-hero">
           <div className="container" style={{ textAlign: 'center' }}>
-            <h1 className="h1" style={{ marginBottom: 12 }}>Global University Search</h1>
+           <h1 className="h1" style={{ marginBottom: 12 }}>
+              {pageHeading}
+            </h1>
+
             <p style={{ color: 'var(--gray-500)', marginBottom: 32, fontSize: '1.05rem' }}>
-              Search across universities, colleges, programs and scholarships worldwide.
+              {introText}
             </p>
             <div style={{ maxWidth: 640, margin: '0 auto' }}>
               <SearchBar

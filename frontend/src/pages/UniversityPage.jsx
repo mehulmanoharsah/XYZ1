@@ -136,32 +136,76 @@ export default function UniversityPage() {
   useScrollTop()
   const { slug, countryName } = useParams()
   const [inst, setInst] = useState(null)
+  const country = countryName || inst.country?.toLowerCase() || ""
 
   const pageTitle = inst
-    ? `${inst.name} — Tuition, Programs & Scholarships | Wellyura`
+    ? `${inst.name} | Tuition Fees, Rankings, Scholarships & Admissions | Wellyura`
     : 'Loading University Details | Wellyura'
   const pageDesc = inst
-    ? `Explore international programs, tuition fees, admission requirements, scholarships, and campus life at ${inst.name} in ${inst.city || ''}, ${inst.province || ''}, ${inst.country || ''} on Wellyura.`
+    ? `Discover tuition fees, rankings, scholarships, admission requirements, acceptance rates, courses, campus life, accommodation and application deadlines for ${inst.name} in ${inst.country}.`
     : 'Compare global universities, tuition fees, eligibility, and scholarships on Wellyura.'
 
   const uniSchema = inst
-    ? {
+  ? {
       "@context": "https://schema.org",
-      "@type": "CollegeOrUniversity",
-      "name": inst.name,
-      "url": window.location.href,
-      "description": pageDesc,
-      "logo": "https://wellyura.com/wellyura_logo.png",
-      "sameAs": inst.website || "",
+      "@graph": [
+        {
+          "@type": "CollegeOrUniversity",
+          "@id": `https://www.wellyura.com/country/${country}/university/${slug}#university`,
+          "name": inst.name,
+          "url": `https://www.wellyura.com/country/${country}/university/${slug}`,
+          "description": pageDesc,
+          "logo": "https://www.wellyura.com/wellyura_logo.png",
+          "sameAs": inst.website ? [inst.website] : [],
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": inst.city || "",
+            "addressRegion": inst.province || "",
+            "addressCountry": inst.country || ""
+          }
+        },
 
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": inst.city || "",
-        "addressRegion": inst.province || "",
-        "addressCountry": inst.country || ""
-      }
+        {
+          "@type": "WebPage",
+          "@id": `https://www.wellyura.com/country/${country}/university/${slug}#webpage`,
+          "url": `https://www.wellyura.com/country/${country}/university/${slug}`,
+          "name": pageTitle,
+          "description": pageDesc,
+          "isPartOf": {
+            "@id": "https://www.wellyura.com/#website"
+          },
+          "about": {
+            "@id": `https://www.wellyura.com/country/${country}/university/${slug}#university`
+          }
+        },
+
+        {
+          "@type": "BreadcrumbList",
+          "@id": `https://www.wellyura.com/country/${country}/university/${slug}#breadcrumb`,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.wellyura.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": inst.country,
+              "item": `https://www.wellyura.com/country/${country}`
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": inst.name,
+              "item": `https://www.wellyura.com/country/${country}/university/${slug}`
+            }
+          ]
+        }
+      ]
     }
-    : null
+  : null
 
   const [programs, setPrograms] = useState([])
   const [loading, setLoading] = useState(true)
@@ -201,16 +245,30 @@ export default function UniversityPage() {
   if (!inst) return null
 
   const fav = isFav(inst.id)
-  const country = countryName || inst.country?.toLowerCase()
+ 
 
   return (
     <>
       <SEO
         title={pageTitle}
         description={pageDesc}
-        keywords={`${inst?.name}, ${inst?.country}, tuition fees, scholarships, admission requirements, programs`}
+        keywords={`
+          ${inst.name},
+          ${inst.country},
+          ${inst.city},
+          study abroad,
+          university rankings,
+          international students,
+          scholarships,
+          tuition fees,
+          admission requirements,
+          acceptance rate,
+          courses,
+          degree programs,
+          student accommodation
+        `}
         url={`https://www.wellyura.com/country/${country}/university/${slug}`}
-        image="/og_preview.png"
+        image="https://www.wellyura.com/og_preview.png"
         schema={uniSchema}
       />
 

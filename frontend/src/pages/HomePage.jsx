@@ -45,26 +45,92 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        title="Study Abroad | Wellyura"
-        description="Explore 250+ universities across Canada, USA, UK, Australia, Germany, France, Singapore, Ireland, New Zealand and more. Compare tuition fees, scholarships, rankings and admission requirements."
-        keywords="study abroad, universities, colleges, scholarships, tuition fees"
-        url="https://www.wellyura.com"
-        image="/og_preview.png"
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Study Abroad | Wellyura",
-          url: "https://www.wellyura.com",
-          description:
-            "Explore universities, scholarships, tuition fees, rankings and admission requirements worldwide.",
-          inLanguage: "en",
-          isPartOf: {
-            "@type": "WebSite",
-            name: "Wellyura",
-            url: "https://www.wellyura.com"
+  title="Study Abroad Universities | Compare 250+ Universities Worldwide | Wellyura"
+  description="Compare 250+ universities across Canada, USA, UK, Australia, Germany, France, Singapore, Ireland and more. Find tuition fees, scholarships, acceptance rates, rankings, courses, admission requirements and application deadlines."
+  keywords="study abroad, universities, international universities, university rankings, scholarships, tuition fees, admission requirements, acceptance rates, degree programs, study in Canada, study in USA, study in UK, study in Australia, study abroad scholarships"
+  url="https://www.wellyura.com"
+  image="https://www.wellyura.com/og_preview.png"
+  schema={{
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.wellyura.com/#website",
+        "url": "https://www.wellyura.com",
+        "name": "Wellyura",
+        "description": "International University Directory",
+        "inLanguage": "en",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.wellyura.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://www.wellyura.com/#webpage",
+        "url": "https://www.wellyura.com",
+        "name": "Study Abroad Universities | Compare 250+ Universities Worldwide",
+        "isPartOf": {
+          "@id": "https://www.wellyura.com/#website"
+        },
+        "description": "Compare universities, tuition fees, scholarships, rankings, admission requirements, acceptance rates and application deadlines worldwide."
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.wellyura.com/#organization",
+        "name": "Wellyura",
+        "url": "https://www.wellyura.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.wellyura.com/images/wellyuralogo_old.png"
+        },
+        "sameAs": [
+          // "https://www.linkedin.com/company/wellyura",
+          "https://www.instagram.com/_wellyura"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://www.wellyura.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I choose the right university?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Compare tuition fees, university rankings, scholarships, admission requirements, acceptance rates and available degree programs to find the best university for your goals."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which countries offer scholarships for international students?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Countries including Canada, USA, UK, Australia, Germany, Ireland, France, Singapore and New Zealand offer scholarships for eligible international students."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I compare universities on Wellyura?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Wellyura allows you to compare universities based on tuition fees, rankings, scholarships, admission requirements, degree programs and more."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Wellyura free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Wellyura is completely free for students to search, compare and explore universities worldwide."
+            }
           }
-        }}
-      />
+        ]
+      }
+    ]
+  }}
+/>
 
       <div>
         {/* ── Hero ─────────────────────────────────────────────── */}
@@ -78,20 +144,17 @@ export default function HomePage() {
               className="h1 hero-title animate-fadeUp"
               style={{ animationDelay: '.08s' }}
             >
-              Find Your Dream University Abroad
-              <br />
-              <span className="hero-title-accent">
-                Study in Canada, USA, UK, Australia & More
-              </span>
+              Find Your Dream Study Abroad University
+            <br />
+            <span className="hero-title-accent">
+            Compare Universities in Canada, USA, UK, Australia & More
+            </span>
             </h1>
             <p
               className="body-lg hero-sub animate-fadeUp"
               style={{ animationDelay: '.16s' }}
             >
-              Compare tuition fees, scholarships, university rankings,
-              admission requirements, acceptance rates, and degree programs
-              from 250+ universities across Canada, USA, UK, Australia,
-              Germany, France, Singapore, Ireland, and more.
+              Compare tuition fees, scholarships, university rankings, acceptance rates, admission requirements, application deadlines, and degree programs from over 250 universities across Canada, USA, UK, Australia, Germany, France, Singapore, Ireland, New Zealand, and more.
             </p>
             <div className="hero-search animate-fadeUp" style={{ animationDelay: '.24s' }}>
               <SearchBar
@@ -185,6 +248,100 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <section className="section container">
+          <div className="section-title">
+            <h2 className="h2">
+              Why Study Abroad with Wellyura?
+            </h2>
+          </div>
+
+          <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+            <p
+              style={{
+                lineHeight: 1.9,
+                color: "var(--gray-600)",
+                marginBottom: 20,
+              }}
+            >
+              Wellyura is a comprehensive international university directory
+              designed to help students compare universities across Canada,
+              USA, UK, Australia, Germany, France, Ireland, Singapore,
+              New Zealand and many other countries.
+            </p>
+
+            <p
+              style={{
+              lineHeight: 1.9,
+              color: "var(--gray-600)",
+              marginBottom: 20,
+            }}
+          >
+             Compare tuition fees, scholarships, admission requirements,
+            university rankings, acceptance rates, degree programs,
+            campus information and application deadlines to confidently
+            choose the university that best matches your academic goals.
+          </p>
+
+          <p
+            style={{
+            lineHeight: 1.9,
+            color: "var(--gray-600)",
+          }}
+        >
+          Whether you're looking for undergraduate,
+          postgraduate or research opportunities,
+          Wellyura simplifies the entire university
+          discovery process by bringing trusted
+          information together in one place.
+        </p>
+      </div>
+    </section>
+
+    <section className="section container">
+      <div className="section-title">
+        <h2 className="h2">
+          Frequently Asked Questions
+        </h2>
+      </div>
+
+      <div className="grid-2">
+        <div className="card" style={{ padding: 24 }}>
+          <h3>How do I choose the right university?</h3>
+          <p>
+            Compare tuition fees, rankings, scholarships,
+            admission requirements and available programs
+            to find the best fit.
+          </p>
+        </div>
+
+        <div className="card" style={{ padding: 24 }}>
+          <h3>Which countries offer scholarships?</h3>
+          <p>
+            Canada, USA, UK, Australia, Germany,
+            Ireland and several other countries
+            offer scholarships for international students.
+          </p>
+        </div>
+
+        <div className="card" style={{ padding: 24 }}>
+          <h3>Can I compare multiple universities?</h3>
+          <p>
+            Yes. Wellyura lets you compare universities
+            across countries using fees,
+            rankings and admissions information.
+          </p>
+        </div>
+
+        <div className="card" style={{ padding: 24 }}>
+          <h3>Is Wellyura free?</h3>
+          <p>
+            Yes. You can search and compare universities
+            completely free.
+          </p>
+        </div>
+      </div>
+    </section>
 
         {/* ── CTA ───────────────────────────────────────────────── */}
         <section className="cta-section">
