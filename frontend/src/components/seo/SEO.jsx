@@ -5,10 +5,13 @@ export default function SEO({
     description,
     keywords = "",
     image = "https://www.wellyura.com/images/wellyuralogo_old.png",
+    imageAlt = "Wellyura",
     url = "https://www.wellyura.com",
     type = "website",
+    author = "Wellyura",
     schema = null,
 }) {
+
     return (
         <Helmet>
             {/* Primary SEO */}
@@ -53,6 +56,20 @@ export default function SEO({
                 property="og:image"
                 content={image}
             />
+            <meta
+                property="og:image:alt"
+                content={imageAlt}
+            />
+
+            <meta
+            property="og:image:width"
+            content="1200"
+            />
+
+            <meta
+            property="og:image:height"
+            content="630"
+            />
 
             <meta
                 property="og:url"
@@ -63,6 +80,10 @@ export default function SEO({
                 property="og:site_name"
                 content="Wellyura"
             />
+            <meta
+                property="og:locale"
+                content="en_US"
+            />
 
             {/* Twitter */}
 
@@ -70,6 +91,11 @@ export default function SEO({
                 name="twitter:card"
                 content="summary_large_image"
             />
+            <meta
+                name="twitter:site"
+                content="@Wellyura"
+            />
+            
 
             <meta
                 name="twitter:title"
@@ -84,6 +110,20 @@ export default function SEO({
             <meta
                 name="twitter:image"
                 content={image}
+            />
+            <meta
+                name="twitter:image:alt"
+                content={imageAlt}
+            />
+
+            <meta
+                name="twitter:url"
+                content={url}
+            />
+
+            <meta
+                name="author"
+                content={author}
             />
 
             {/* JSON-LD */}
