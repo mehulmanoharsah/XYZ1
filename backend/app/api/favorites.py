@@ -2,17 +2,16 @@
 Favorites routes (authenticated):
   GET    /api/favorites            – list user's saved institutions
   POST   /api/favorites            – save an institution
-  DELETE /api/favorites/{inst_id}  – remove a saved institution
+  DELETE /api/favorites/{institution_id}  – remove a saved institution
 """
-from datetime import datetime
 
-from bson import ObjectId
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.database import get_db
 from app.middleware.auth_middleware import get_current_user
 from app.models.schemas import FavoriteCreateRequest, OkResponse
-from app.utils.helpers import serialize_doc, serialize_list
+from app.supabase import supabase
 
 router = APIRouter(prefix="/api/favorites", tags=["Favorites"])
 
@@ -21,14 +20,16 @@ router = APIRouter(prefix="/api/favorites", tags=["Favorites"])
 @router.get("", summary="List all saved institutions for the current user")
 async def list_favorites(
     current_user: dict = Depends(get_current_user),
-    db=Depends(get_db),
 ):
-    docs = (
-        await db.favorites.find({"user_id": current_user["id"]})
-        .sort("created_at", -1)
-        .to_list(500)
+    response = (
+        supabase.table("favorites")
+        .select("*")
+        .eq("user_id", current_user["id"])
+        .order("created_at", desc=True)
+        .execute()
     )
-    return serialize_list(docs)
+
+    return response.data
 
 
 # ── POST /api/favorites ───────────────────────────────────────
@@ -40,33 +41,47 @@ async def list_favorites(
 async def add_favorite(
     payload: FavoriteCreateRequest,
     current_user: dict = Depends(get_current_user),
-    db=Depends(get_db),
 ):
-    # Guard against duplicates (unique index also covers this)
-    existing = await db.favorites.find_one(
-        {
-            "user_id": current_user["id"],
-            "institution_id": payload.institution_id,
-        }
+    # Check for duplicates
+    existing = (
+        supabase.table("favorites")
+        .select("id")
+        .eq("user_id", current_user["id"])
+        .eq("institution_id", payload.institution_id)
+        .limit(1)
+        .execute()
     )
-    if existing:
+
+    if existing.data:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Institution is already in your favorites.",
         )
 
-    doc = {
-        "user_id": current_user["id"],
-        "institution_id": payload.institution_id,
-        "institution_name": payload.institution_name,
-        "city": payload.city,
-        "province": payload.province,
-        "country": payload.country,
-        "created_at": datetime.utcnow(),
-    }
-    result = await db.favorites.insert_one(doc)
-    doc["_id"] = result.inserted_id
-    return serialize_doc(doc)
+    try:
+        response = (
+            supabase.table("favorites")
+            .insert(
+                {
+                    "user_id": current_user["id"],
+                    "institution_id": payload.institution_id,
+                    "institution_name": payload.institution_name,
+                    "city": payload.city,
+                    "province": payload.province,
+                    "country": payload.country,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+            .execute()
+        )
+
+        return response.data[0]
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to save favorite.",
+        )
 
 
 # ── DELETE /api/favorites/{institution_id} ────────────────────
@@ -78,17 +93,28 @@ async def add_favorite(
 async def remove_favorite(
     institution_id: str,
     current_user: dict = Depends(get_current_user),
-    db=Depends(get_db),
 ):
-    result = await db.favorites.delete_one(
-        {
-            "user_id": current_user["id"],
-            "institution_id": institution_id,
-        }
+    existing = (
+        supabase.table("favorites")
+        .select("id")
+        .eq("user_id", current_user["id"])
+        .eq("institution_id", institution_id)
+        .limit(1)
+        .execute()
     )
-    if result.deleted_count == 0:
+
+    if not existing.data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Favorite not found.",
         )
+
+    (
+        supabase.table("favorites")
+        .delete()
+        .eq("user_id", current_user["id"])
+        .eq("institution_id", institution_id)
+        .execute()
+    )
+
     return OkResponse(message="Removed from favorites.")

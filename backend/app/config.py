@@ -1,17 +1,26 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
 from typing import List
 
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
-    mongodb_url: str = "mongodb://localhost:27017"
-    db_name: str = "canadian_institutions"
+    # Supabase
+    supabase_url: str
+    supabase_service_key: str
+
+    # JWT
     secret_key: str = "dev-secret-key-CHANGE-IN-PRODUCTION"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 10080  # 7 days
+    access_token_expire_minutes: int = 10080
 
-    # Comma-separated origins stored as string, exposed as list
-    cors_origins: str = "http://localhost:5173,http://localhost:3000,https://www.wellyura.com,https://wellyura.com"
+    # CORS
+    cors_origins: str = (
+        "http://localhost:5173,"
+        "http://localhost:3000,"
+        "https://www.wellyura.com,"
+        "https://wellyura.com"
+    )
 
     class Config:
         env_file = ".env"

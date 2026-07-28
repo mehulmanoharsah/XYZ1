@@ -4,68 +4,38 @@ Institution routes:
   GET /api/institutions/country/{country_name} – scoped to one country
   GET /api/institutions/{slug_or_id}           – single institution detail
 """
-import math
 import re
 
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query
 
-from app.database import get_db
-from app.utils.helpers import serialize_doc, serialize_list
+from app.supabase import supabase
 
 router = APIRouter(prefix="/api/institutions", tags=["Institutions"])
 
-
-# ── Shared filter builder ─────────────────────────────────────
-def _build_country_filter(country: str | None) -> dict | None:
+def normalize_country(country: str | None):
     if not country:
         return None
+    return re.sub(r"[\s-]+", " ", country.strip()).lower()
 
-    normalized = re.sub(r"[\s-]+", " ", country.strip()).lower()
-    pattern = re.escape(normalized).replace(r"\ ", r"[\s-]")
-    return {"country": {"$regex": pattern, "$options": "i"}}
+def build_filters(query, country, province, city, inst_type):
+    if country:
+        query = query.ilike("country", f"%{normalize_country(country)}%")
 
-
-def _build_filter(
-    country: str | None,
-    province: str | None,
-    city: str | None,
-    inst_type: str | None,
-    scholarship: bool | None,
-    q: str | None,
-) -> dict:
-    f: dict = {}
-
-    country_filter = _build_country_filter(country)
-    if country_filter:
-        f.update(country_filter)
     if province:
-        f["province"] = {"$regex": re.escape(province), "$options": "i"}
+        query = query.ilike("province", f"%{province}%")
+
     if city:
-        f["city"] = {"$regex": re.escape(city), "$options": "i"}
+        query = query.ilike("city", f"%{city}%")
+
     if inst_type:
-        f["type"] = {"$regex": re.escape(inst_type), "$options": "i"}
-    if scholarship is True:
-        # Has at least one scholarship entry
-        f["scholarships.0"] = {"$exists": True}
+        query = query.ilike("type", f"%{inst_type}%")
 
-    if q and q.strip():
-        escaped = re.escape(q.strip())
-        f["$or"] = [
-            {"name": {"$regex": escaped, "$options": "i"}},
-            {"city": {"$regex": escaped, "$options": "i"}},
-            {"province": {"$regex": escaped, "$options": "i"}},
-            {"top_ug_programs": {"$elemMatch": {"$regex": escaped, "$options": "i"}}},
-            {"top_pg_programs": {"$elemMatch": {"$regex": escaped, "$options": "i"}}},
-        ]
-
-    return f
-
+    return query
 
 # ── GET /api/institutions ─────────────────────────────────────
 @router.get("", summary="List all institutions with optional filters")
 async def list_institutions(
-    q: str | None = Query(None, description="Full-text search"),
+    q: str | None = Query(None),
     country: str | None = Query(None),
     province: str | None = Query(None),
     city: str | None = Query(None),
@@ -73,26 +43,37 @@ async def list_institutions(
     scholarship: bool | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=50),
-    db=Depends(get_db),
 ):
-    f = _build_filter(country, province, city, type, scholarship, q)
-    total = await db.institutions.count_documents(f)
-    skip = (page - 1) * limit
+    start = (page - 1) * limit
+    end = start + limit - 1
 
-    cursor = (
-        db.institutions.find(f, {"contacts": 0})
-        .sort("name", 1)
-        .skip(skip)
-        .limit(limit)
+    query = (
+        supabase.table("universities")
+        .select("*", count="exact")
+        .order("name")
     )
-    docs = await cursor.to_list(length=limit)
+
+    query = build_filters(query, country, province, city, type)
+
+    if q:
+        query = query.or_(
+            f"name.ilike.%{q}%,abbreviation.ilike.%{q}%,city.ilike.%{q}%,province.ilike.%{q}%"
+        )
+
+    if scholarship:
+        query = query.not_.is_("scholarships", "null")
+
+    response = query.range(start, end).execute()
+
+    data = response.data or []
+    total = response.count or 0
 
     return {
-        "data": serialize_list(docs),
+        "data": data,
         "total": total,
         "page": page,
         "limit": limit,
-        "total_pages": math.ceil(total / limit) if total else 0,
+        "total_pages": (total + limit - 1) // limit,
     }
 
 
@@ -110,73 +91,110 @@ async def list_by_country(
     scholarship: bool | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=50),
-    db=Depends(get_db),
 ):
-    f = _build_filter(country_name, province, city, type, scholarship, q)
-    total = await db.institutions.count_documents(f)
-    skip = (page - 1) * limit
+    start = (page - 1) * limit
+    end = start + limit - 1
 
-    cursor = (
-        db.institutions.find(f)
-        .sort("name", 1)
-        .skip(skip)
-        .limit(limit)
+    query = (
+        supabase.table("universities")
+        .select("*", count="exact")
+        .ilike("country", f"%{normalize_country(country_name)}%")
+        .order("name")
     )
-    docs = await cursor.to_list(length=limit)
 
-    # Aggregate province & city lists for the sidebar (unfiltered by current
-    # province/city so the dropdowns stay fully populated)
-    country_filter = _build_country_filter(country_name)
-    pipeline = [
-        {"$match": country_filter},
+    query = build_filters(query, None, province, city, type)
+
+    if q:
+        query = query.or_(
+            f"name.ilike.%{q}%,abbreviation.ilike.%{q}%,city.ilike.%{q}%,province.ilike.%{q}%"
+        )
+
+    if scholarship:
+        query = query.not_.is_("scholarships", "null")
+
+    response = query.range(start, end).execute()
+
+    data = response.data or []
+    total = response.count or 0
+
+    # Fetch all universities in this country for sidebar filters
+    sidebar = (
+        supabase.table("universities")
+        .select("province,city")
+        .ilike("country", f"%{normalize_country(country_name)}%")
+        .execute()
+    )
+
+    provinces = sorted(
         {
-            "$group": {
-                "_id": None,
-                "provinces": {"$addToSet": "$province"},
-                "cities": {"$addToSet": "$city"},
-            }
-        },
-    ]
-    agg = await db.institutions.aggregate(pipeline).to_list(1)
-    provinces = sorted(p for p in (agg[0]["provinces"] if agg else []) if p)
-    cities = sorted(c for c in (agg[0]["cities"] if agg else []) if c)
+            row["province"]
+            for row in sidebar.data
+            if row.get("province")
+        }
+    )
+
+    cities = sorted(
+        {
+            row["city"]
+            for row in sidebar.data
+            if row.get("city")
+        }
+    )
 
     return {
-        "data": serialize_list(docs),
+        "data": data,
         "total": total,
         "page": page,
         "limit": limit,
-        "total_pages": math.ceil(total / limit) if total else 0,
-        "filters": {"provinces": provinces, "cities": cities},
-        "filter_options": {"provinces": provinces, "cities": cities},
+        "total_pages": (total + limit - 1) // limit,
+        "filters": {
+            "provinces": provinces,
+            "cities": cities,
+        },
+        "filter_options": {
+            "provinces": provinces,
+            "cities": cities,
+        },
     }
 
 
 # ── GET /api/institutions/{slug_or_id} ────────────────────────
 @router.get(
     "/{slug_or_id}",
-    summary="Get a single institution by MongoDB ObjectId or name slug",
+    summary="Get a single institution by slug",
 )
-async def get_institution(slug_or_id: str, db=Depends(get_db)):
-    doc = None
+async def get_institution(slug_or_id: str):
+    target_slug = re.sub(
+        r"-+",
+        "-",
+        re.sub(r"[^a-z0-9-]", "", slug_or_id.lower().replace(" ", "-")),
+    )
 
-    # 1) Try exact ObjectId lookup
-    if ObjectId.is_valid(slug_or_id):
-        doc = await db.institutions.find_one({"_id": ObjectId(slug_or_id)})
+    # 1. Exact slug lookup
+    response = (
+        supabase.table("universities")
+        .select("*")
+        .eq("slug", target_slug)
+        .limit(1)
+        .execute()
+    )
 
-    # 2) Fallback: match by normalized slug (handles special characters like apostrophes)
-    if not doc:
-        target_slug = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '', slug_or_id.lower().replace(" ", "-")))
-        doc = await db.institutions.find_one({"slug": target_slug})
+    if response.data:
+        return response.data[0]
 
-    # 3) Fallback: treat slug as a URL-encoded name word-by-word
-    if not doc:
-        name_guess = slug_or_id.replace("-", " ")
-        doc = await db.institutions.find_one(
-            {"name": {"$regex": re.escape(name_guess), "$options": "i"}}
-        )
+    # 2. Fallback: search by name
+    response = (
+        supabase.table("universities")
+        .select("*")
+        .ilike("name", f"%{slug_or_id.replace("-", " ").strip()}%")
+        .limit(1)
+        .execute()
+    )
 
-    if not doc:
-        raise HTTPException(status_code=404, detail="Institution not found.")
+    if response.data:
+        return response.data[0]
 
-    return serialize_doc(doc)
+    raise HTTPException(
+        status_code=404,
+        detail="Institution not found."
+    )

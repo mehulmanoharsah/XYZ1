@@ -9,54 +9,91 @@ Admin routes (admin JWT required):
   PUT    /api/admin/users/{id}/toggle-admin
   DELETE /api/admin/users/{id}
 """
-from datetime import datetime, timedelta
 
-from bson import ObjectId
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
-from app.database import get_db
 from app.middleware.auth_middleware import get_admin_user
-from app.utils.helpers import serialize_doc, serialize_list
+from app.supabase import supabase
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 _admin = Depends(get_admin_user)
 
 
-# ── GET /api/admin/stats ──────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# Platform statistics
+# ─────────────────────────────────────────────────────────────
 @router.get("/stats", summary="Platform-wide analytics")
-async def get_stats(db=Depends(get_db), _=_admin):
-    week_ago = datetime.utcnow() - timedelta(days=7)
+async def get_stats(_=_admin):
+    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
-    institutions, users, favorites, searches, programs, recent_signups = (
-        await db.institutions.count_documents({}),
-        await db.users.count_documents({}),
-        await db.favorites.count_documents({}),
-        await db.search_history.count_documents({}),
-        await db.programs.count_documents({}),
-        await db.users.count_documents({"created_at": {"$gte": week_ago}}),
-    )
+    institutions = (
+        supabase.table("universities")
+        .select("id", count="exact")
+        .limit(1)
+        .execute()
+    ).count
+
+    users = (
+        supabase.table("users")
+        .select("id", count="exact")
+        .limit(1)
+        .execute()
+    ).count
+
+    favorites = (
+        supabase.table("favorites")
+        .select("id", count="exact")
+        .limit(1)
+        .execute()
+    ).count
+
+    searches = (
+        supabase.table("search_history")
+        .select("id", count="exact")
+        .limit(1)
+        .execute()
+    ).count
+
+    programs = (
+        supabase.table("programs")
+        .select("id", count="exact")
+        .limit(1)
+        .execute()
+    ).count
+
+    recent_signups = (
+        supabase.table("users")
+        .select("id", count="exact")
+        .gte("created_at", week_ago)
+        .execute()
+    ).count
+
     return {
-        "institutions": institutions,
-        "users": users,
-        "favorites": favorites,
-        "searches": searches,
-        "programs": programs,
-        "recent_signups": recent_signups,
+        "institutions": institutions or 0,
+        "users": users or 0,
+        "favorites": favorites or 0,
+        "searches": searches or 0,
+        "programs": programs or 0,
+        "recent_signups": recent_signups or 0,
     }
 
 
-# ── Institutions CRUD ─────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# Institutions
+# ─────────────────────────────────────────────────────────────
 @router.get("/institutions", summary="Full institution list for admin")
-async def admin_list_institutions(db=Depends(get_db), _=_admin):
-    docs = (
-        await db.institutions.find(
-            {}, {"name": 1, "city": 1, "province": 1, "country": 1, "type": 1}
-        )
-        .sort("name", 1)
-        .to_list(1000)
+async def admin_list_institutions(_=_admin):
+    response = (
+        supabase.table("universities")
+        .select("id,name,city,province,country,type")
+        .order("name")
+        .execute()
     )
-    return serialize_list(docs)
+
+    return response.data
 
 
 @router.post(
@@ -65,34 +102,43 @@ async def admin_list_institutions(db=Depends(get_db), _=_admin):
     summary="Create a new institution",
 )
 async def admin_create_institution(
-    data: dict = Body(...), db=Depends(get_db), _=_admin
+    data: dict = Body(...),
+    _=_admin,
 ):
-    data["created_at"] = datetime.utcnow()
-    result = await db.institutions.insert_one(data)
-    doc = await db.institutions.find_one({"_id": result.inserted_id})
-    return serialize_doc(doc)
+    data["created_at"] = datetime.now(timezone.utc).isoformat()
+
+    response = (
+        supabase.table("universities")
+        .insert(data)
+        .execute()
+    )
+
+    return response.data[0]
 
 
-@router.put("/institutions/{institution_id}", summary="Update an institution")
+@router.put("/institutions/{institution_id}")
 async def admin_update_institution(
     institution_id: str,
     data: dict = Body(...),
-    db=Depends(get_db),
     _=_admin,
 ):
-    if not ObjectId.is_valid(institution_id):
-        raise HTTPException(status_code=400, detail="Invalid institution ID.")
+    data.pop("id", None)
+    data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    data.pop("_id", None)
-    data["updated_at"] = datetime.utcnow()
-    result = await db.institutions.update_one(
-        {"_id": ObjectId(institution_id)}, {"$set": data}
+    response = (
+        supabase.table("universities")
+        .update(data)
+        .eq("id", institution_id)
+        .execute()
     )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Institution not found.")
 
-    doc = await db.institutions.find_one({"_id": ObjectId(institution_id)})
-    return serialize_doc(doc)
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Institution not found.",
+        )
+
+    return response.data[0]
 
 
 @router.delete(
@@ -100,62 +146,136 @@ async def admin_update_institution(
     summary="Delete an institution and its programs",
 )
 async def admin_delete_institution(
-    institution_id: str, db=Depends(get_db), _=_admin
+    institution_id: str,
+    _=_admin,
 ):
-    if not ObjectId.is_valid(institution_id):
-        raise HTTPException(status_code=400, detail="Invalid institution ID.")
+    existing = (
+        supabase.table("universities")
+        .select("id")
+        .eq("id", institution_id)
+        .limit(1)
+        .execute()
+    )
 
-    result = await db.institutions.delete_one({"_id": ObjectId(institution_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Institution not found.")
+    if not existing.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Institution not found.",
+        )
 
-    # Cascade-delete programs belonging to this institution
-    await db.programs.delete_many({"institution_id": ObjectId(institution_id)})
-    return {"message": "Institution and its programs deleted."}
+    (
+        supabase.table("universities")
+        .delete()
+        .eq("id", institution_id)
+        .execute()
+    )
+
+    (
+        supabase.table("programs")
+        .delete()
+        .eq("institution_id", institution_id)
+        .execute()
+    )
+
+    return {
+        "message": "Institution and its programs deleted."
+    }
 
 
-# ── Users management ──────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# Users
+# ─────────────────────────────────────────────────────────────
 @router.get("/users", summary="List all registered users")
-async def admin_list_users(db=Depends(get_db), _=_admin):
-    docs = (
-        await db.users.find({}, {"password": 0})
-        .sort("created_at", -1)
-        .to_list(1000)
+async def admin_list_users(_=_admin):
+    response = (
+        supabase.table("users")
+        .select("*")
+        .order("created_at", desc=True)
+        .execute()
     )
-    return serialize_list(docs)
+
+    users = response.data
+
+    for user in users:
+        user.pop("password", None)
+
+    return users
 
 
-@router.put("/users/{user_id}/toggle-admin", summary="Grant or revoke admin rights")
+@router.put("/users/{user_id}/toggle-admin")
 async def admin_toggle_admin(
-    user_id: str, db=Depends(get_db), _=_admin
+    user_id: str,
+    _=_admin,
 ):
-    if not ObjectId.is_valid(user_id):
-        raise HTTPException(status_code=400, detail="Invalid user ID.")
-
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    new_status = not user.get("is_admin", False)
-    await db.users.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": {"is_admin": new_status}}
+    response = (
+        supabase.table("users")
+        .select("is_admin")
+        .eq("id", user_id)
+        .limit(1)
+        .execute()
     )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found.",
+        )
+
+    new_status = not response.data[0].get("is_admin", False)
+
+    (
+        supabase.table("users")
+        .update({"is_admin": new_status})
+        .eq("id", user_id)
+        .execute()
+    )
+
     return {
         "message": f"Admin status set to {new_status}.",
         "is_admin": new_status,
     }
 
 
-@router.delete("/users/{user_id}", summary="Permanently delete a user")
-async def admin_delete_user(user_id: str, db=Depends(get_db), _=_admin):
-    if not ObjectId.is_valid(user_id):
-        raise HTTPException(status_code=400, detail="Invalid user ID.")
+@router.delete("/users/{user_id}")
+async def admin_delete_user(
+    user_id: str,
+    _=_admin,
+):
+    response = (
+        supabase.table("users")
+        .select("id")
+        .eq("id", user_id)
+        .limit(1)
+        .execute()
+    )
 
-    result = await db.users.delete_one({"_id": ObjectId(user_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="User not found.")
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found.",
+        )
 
-    # Clean up related data
-    await db.favorites.delete_many({"user_id": user_id})
-    await db.search_history.delete_many({"user_id": user_id})
-    return {"message": "User deleted."}
+    (
+        supabase.table("users")
+        .delete()
+        .eq("id", user_id)
+        .execute()
+    )
+
+    (
+        supabase.table("favorites")
+        .delete()
+        .eq("user_id", user_id)
+        .execute()
+    )
+
+    (
+        supabase.table("search_history")
+        .delete()
+        .eq("user_id", user_id)
+        .execute()
+    )
+
+    return {
+        "message": "User deleted."
+    }

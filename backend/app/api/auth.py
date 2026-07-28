@@ -6,12 +6,10 @@ Authentication routes:
   PUT  /api/auth/me
   PUT  /api/auth/change-password
 """
-from datetime import datetime
+from datetime import datetime, timezone
+from uuid import uuid4
 
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
-
-from app.database import get_db
 from app.middleware.auth_middleware import get_current_user
 from app.models.schemas import (
     ChangePasswordRequest,
@@ -22,54 +20,90 @@ from app.models.schemas import (
     OkResponse,
 )
 from app.utils.auth import create_access_token, hash_password, verify_password
-from app.utils.helpers import serialize_doc
+from app.supabase import supabase
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
-# ── Register ──────────────────────────────────────────────────
 @router.post(
     "/register",
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new user account",
 )
-async def register(payload: RegisterRequest, db=Depends(get_db)):
-    if await db.users.find_one({"email": payload.email}):
+async def register(payload: RegisterRequest):
+    existing = (
+        supabase.table("users")
+        .select("id")
+        .eq("email", payload.email)
+        .limit(1)
+        .execute()
+    )
+
+    if existing.data:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="An account with this email already exists.",
         )
 
-    doc = {
-        "full_name": payload.full_name,
-        "email": payload.email,
-        "password": hash_password(payload.password),
-        "phone": payload.phone,
-        "preferred_country": payload.preferred_country,
-        "is_admin": False,
-        "recently_viewed": [],
-        "created_at": datetime.utcnow(),
-    }
-    result = await db.users.insert_one(doc)
-    token = create_access_token(str(result.inserted_id))
+    user_id = str(uuid4())
+
+    try:
+        supabase.table("users").insert(
+            {
+                "id": user_id,
+                "full_name": payload.full_name,
+                "email": payload.email,
+                "password": hash_password(payload.password),
+                "phone": payload.phone,
+                "preferred_country": payload.preferred_country,
+                "is_admin": False,
+                "recently_viewed": [],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+        ).execute()
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to create account.",
+        )
+
+    token = create_access_token(user_id)
+
     return TokenResponse(access_token=token)
 
 
-# ── Login ─────────────────────────────────────────────────────
 @router.post(
     "/login",
     response_model=TokenResponse,
     summary="Obtain a JWT for an existing account",
 )
-async def login(payload: LoginRequest, db=Depends(get_db)):
-    user = await db.users.find_one({"email": payload.email})
-    if not user or not verify_password(payload.password, user["password"]):
+async def login(payload: LoginRequest):
+    response = (
+        supabase.table("users")
+        .select("*")
+        .eq("email", payload.email)
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
         )
-    token = create_access_token(str(user["_id"]))
+
+    user = response.data[0]
+
+    if not verify_password(payload.password, user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password.",
+        )
+
+    token = create_access_token(user["id"])
+
     return TokenResponse(access_token=token)
 
 
@@ -80,27 +114,41 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
 
 
-# ── Me (update) ───────────────────────────────────────────────
 @router.put("/me", summary="Update profile fields")
 async def update_me(
     payload: UpdateProfileRequest,
     current_user: dict = Depends(get_current_user),
-    db=Depends(get_db),
 ):
     updates = payload.model_dump(exclude_none=True)
+
     if updates:
-        await db.users.update_one(
-            {"_id": ObjectId(current_user["id"])},
-            {"$set": updates},
+        (
+            supabase.table("users")
+            .update(updates)
+            .eq("id", current_user["id"])
+            .execute()
         )
 
-    updated = await db.users.find_one({"_id": ObjectId(current_user["id"])})
-    result = serialize_doc(updated)
-    result.pop("password", None)
-    return result
+    response = (
+        supabase.table("users")
+        .select("*")
+        .eq("id", current_user["id"])
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user = response.data[0]
+    user.pop("password", None)
+
+    return user
 
 
-# ── Change password ───────────────────────────────────────────
 @router.put(
     "/change-password",
     response_model=OkResponse,
@@ -109,16 +157,45 @@ async def update_me(
 async def change_password(
     payload: ChangePasswordRequest,
     current_user: dict = Depends(get_current_user),
-    db=Depends(get_db),
 ):
-    user = await db.users.find_one({"_id": ObjectId(current_user["id"])})
-    if not verify_password(payload.current_password, user["password"]):
+    response = (
+        supabase.table("users")
+        .select("password")
+        .eq("id", current_user["id"])
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user = response.data[0]
+
+    if not verify_password(
+        payload.current_password,
+        user["password"],
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect.",
         )
-    await db.users.update_one(
-        {"_id": ObjectId(current_user["id"])},
-        {"$set": {"password": hash_password(payload.new_password)}},
+
+    (
+        supabase.table("users")
+        .update(
+            {
+                "password": hash_password(
+                    payload.new_password
+                )
+            }
+        )
+        .eq("id", current_user["id"])
+        .execute()
     )
-    return OkResponse(message="Password updated successfully.")
+
+    return OkResponse(
+        message="Password updated successfully."
+    )

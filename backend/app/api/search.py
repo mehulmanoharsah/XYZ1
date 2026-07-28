@@ -3,20 +3,16 @@ Search routes:
   GET /api/search          – global full-text search
   GET /api/search/countries – aggregated country stats
 """
-import math
-import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 
-from app.database import get_db
 from app.middleware.auth_middleware import get_optional_user
-from app.utils.helpers import serialize_list
+from app.supabase import supabase
 
 router = APIRouter(prefix="/api/search", tags=["Search"])
 
 
-# ── GET /api/search ───────────────────────────────────────────
 @router.get("", summary="Search institutions and programs globally")
 async def global_search(
     q: str = Query("", description="Search query"),
@@ -28,115 +24,157 @@ async def global_search(
     scholarship: bool | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=50),
-    db=Depends(get_db),
     current_user: dict | None = Depends(get_optional_user),
 ):
-    # ── Build institution filter ──────────────────────────────
-    inst_filter: dict = {}
+    start = (page - 1) * limit
+    end = start + limit - 1
+
+    inst_query = (
+        supabase.table("universities")
+        .select("*", count="exact")
+        .order("name")
+    )
 
     if country:
-        inst_filter["country"] = {"$regex": re.escape(country), "$options": "i"}
+        inst_query = inst_query.ilike("country", f"%{country}%")
+
     if province:
-        inst_filter["province"] = {"$regex": re.escape(province), "$options": "i"}
+        inst_query = inst_query.ilike("province", f"%{province}%")
+
     if city:
-        inst_filter["city"] = {"$regex": re.escape(city), "$options": "i"}
+        inst_query = inst_query.ilike("city", f"%{city}%")
+
     if type:
-        inst_filter["type"] = {"$regex": re.escape(type), "$options": "i"}
-    if scholarship is True:
-        inst_filter["scholarships.0"] = {"$exists": True}
+        inst_query = inst_query.ilike("type", f"%{type}%")
+
+    if scholarship:
+        inst_query = inst_query.not_.is_("scholarships", "null")
 
     if q.strip():
-        escaped = re.escape(q.strip())
-        inst_filter["$or"] = [
-            {"name": {"$regex": escaped, "$options": "i"}},
-            {"city": {"$regex": escaped, "$options": "i"}},
-            {"province": {"$regex": escaped, "$options": "i"}},
-            {"top_ug_programs": {"$elemMatch": {"$regex": escaped, "$options": "i"}}},
-            {"top_pg_programs": {"$elemMatch": {"$regex": escaped, "$options": "i"}}},
-        ]
-
-    # ── Build program filter ──────────────────────────────────
-    prog_filter: dict = {}
-    if level:
-        prog_filter["level"] = level.upper()
-    if q.strip():
-        escaped = re.escape(q.strip())
-        prog_filter["$or"] = [
-            {"name": {"$regex": escaped, "$options": "i"}},
-            {"faculty": {"$regex": escaped, "$options": "i"}},
-        ]
-
-    # ── Execute queries ───────────────────────────────────────
-    total = await db.institutions.count_documents(inst_filter)
-    skip = (page - 1) * limit
-
-    inst_cursor = (
-        db.institutions.find(inst_filter, {"contacts": 0})
-        .sort("name", 1)
-        .skip(skip)
-        .limit(limit)
-    )
-    institutions = await inst_cursor.to_list(length=limit)
-
-    programs: list = []
-    if prog_filter:
-        prog_cursor = db.programs.find(prog_filter).sort("name", 1).limit(20)
-        programs = await prog_cursor.to_list(20)
-
-    # ── Log search history ────────────────────────────────────
-    if current_user and q.strip():
-        await db.search_history.insert_one(
-            {
-                "user_id": current_user["id"],
-                "query": q.strip(),
-                "filters": {
-                    "country": country,
-                    "province": province,
-                    "city": city,
-                    "level": level,
-                    "type": type,
-                },
-                "created_at": datetime.utcnow(),
-            }
+        inst_query = inst_query.or_(
+            f"name.ilike.%{q}%,"
+            f"abbreviation.ilike.%{q}%,"
+            f"city.ilike.%{q}%,"
+            f"province.ilike.%{q}%"
         )
 
-    # ── Aggregate filters dynamically if country is selected ──
+    inst_response = (
+        inst_query
+        .range(start, end)
+        .execute()
+    )
+
+    institutions = inst_response.data or []
+    total = inst_response.count or 0
+
+    programs = []
+
+    if q.strip() or level:
+        prog_query = (
+            supabase.table("programs")
+            .select("*")
+            .order("name")
+        )
+
+        if level:
+            prog_query = prog_query.eq("level", level.upper())
+
+        if q.strip():
+            prog_query = prog_query.or_(
+                f"name.ilike.%{q}%,faculty.ilike.%{q}%"
+            )
+
+        prog_response = (
+            prog_query
+            .limit(20)
+            .execute()
+        )
+
+        programs = prog_response.data or []
+
+    if current_user and q.strip():
+        try:
+            supabase.table("search_history").insert(
+                {
+                    "user_id": current_user["id"],
+                    "query": q.strip(),
+                    "filters": {
+                        "country": country,
+                        "province": province,
+                        "city": city,
+                        "type": type,
+                        "level": level,
+                    },
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            ).execute()
+        except Exception:
+            # Don't fail the search if history logging fails
+            pass
+
     provinces = []
     cities = []
+
     if country:
-        country_filter = {"country": {"$regex": re.escape(country), "$options": "i"}}
-        pipeline = [
-            {"$match": country_filter},
-            {
-                "$group": {
-                    "_id": None,
-                    "provinces": {"$addToSet": "$province"},
-                    "cities": {"$addToSet": "$city"},
-                }
-            },
-        ]
-        agg = await db.institutions.aggregate(pipeline).to_list(1)
-        provinces = sorted(p for p in (agg[0]["provinces"] if agg else []) if p)
-        cities = sorted(c for c in (agg[0]["cities"] if agg else []) if c)
+        sidebar = (
+            supabase.table("universities")
+            .select("province,city")
+            .ilike("country", f"%{country}%")
+            .execute()
+        )
+
+        provinces = sorted({
+            r["province"]
+            for r in sidebar.data
+            if r.get("province")
+        })
+
+        cities = sorted({
+            r["city"]
+            for r in sidebar.data
+            if r.get("city")
+        })
 
     return {
-        "institutions": serialize_list(institutions),
-        "programs": serialize_list(programs),
+        "institutions": institutions,
+        "programs": programs,
         "total": total,
         "page": page,
         "limit": limit,
-        "total_pages": math.ceil(total / limit) if total else 0,
-        "filters": {"provinces": provinces, "cities": cities},
+        "total_pages": (total + limit - 1) // limit,
+        "filters": {
+            "provinces": provinces,
+            "cities": cities,
+        },
     }
 
 
-# ── GET /api/search/countries ─────────────────────────────────
 @router.get("/countries", summary="Country list with institution counts")
-async def get_countries(db=Depends(get_db)):
-    pipeline = [
-        {"$group": {"_id": "$country", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$project": {"_id": 0, "country": "$_id", "count": 1}},
+async def get_countries():
+    response = (
+        supabase.table("universities")
+        .select("country")
+        .execute()
+    )
+
+    counts = {}
+
+    for row in response.data or []:
+        country = row.get("country")
+
+        if not country:
+            continue
+
+        counts[country] = counts.get(country, 0) + 1
+
+    return [
+        {
+            "country": country,
+            "count": count,
+        }
+        for country, count in sorted(
+            counts.items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )
     ]
-    result = await db.institutions.aggregate(pipeline).to_list(100)
-    return [r for r in result if r.get("country")]
