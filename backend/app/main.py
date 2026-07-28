@@ -110,7 +110,7 @@ async def health():
     summary="Dynamic XML sitemap",
 )
 async def get_sitemap():
-    base_url = "https://wellyura.com"
+    base_url = "https://www.wellyura.com"
 
     static_paths = [
         "",
