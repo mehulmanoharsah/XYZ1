@@ -186,7 +186,7 @@ async def get_institution(slug_or_id: str):
     response = (
         supabase.table("universities")
         .select("*")
-        .ilike("name", f"%{slug_or_id.replace("-", " ").strip()}%")
+        .ilike("name", f"%{slug_or_id.replace('-', ' ').strip()}%")
         .limit(1)
         .execute()
     )
