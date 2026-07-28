@@ -7,10 +7,11 @@ Allow: /faq
 Allow: /contact
 Allow: /privacy
 Allow: /terms
+
 Disallow: /admin/
 Disallow: /favorites/
 Disallow: /dashboard/
 Disallow: /login
 Disallow: /register
 
-Sitemap: https://wellyura.com/sitemap.xml
+Sitemap: https://www.wellyura.com/sitemap.xml
