@@ -206,7 +206,7 @@ export default function AccommodationPage() {
                   style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#db2777' }}
                 />
                 <span style={{ fontSize: '0.925rem', color: 'var(--gray-800)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                  🎀 Girls Only
+                Girls Only
                 </span>
               </label>
             </div>
@@ -262,7 +262,7 @@ export default function AccommodationPage() {
                           </span>
                           {acc.gender_policy === 'female_only' && (
                             <span className="badge" style={{ background: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8', fontWeight: 600 }}>
-                              🎀 Girls Only
+                              Girls Only
                             </span>
                           )}
                         </div>
